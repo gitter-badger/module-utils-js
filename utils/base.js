@@ -1,13 +1,34 @@
+exports.name = 'your-module-name.js';
+exports.version = '1.0.0';
+exports.utilsVersion = '1.0.0';
+exports.objectKeys = function(obj) {
+    var keys = [];
+    var k;
+    for (k in obj) {
+        if (Object.prototype.hasOwnProperty.call(obj, k)) {
+            keys.push(k);
+        }
+    }
+    return keys;
+}
 exports.forIn = function(object, fn) {
+    var len = exports.objectKeys(object).length;
+    var i = 0;
     for (var key in object) {
         if (object.hasOwnProperty(key)) {
-            fn(key, object[key]);
+            var first = (i == 0);
+            var last = ((i + 1) == len);
+            fn(key, object[key], first, last);
+            i++;
         }
     }
 };
 exports.forEach = function(arr, fn) {
-    for (var i = 0; i < arr.length; i++) {
-        fn(arr[i], i, arr);
+    var len = arr.length;
+    for (var i = 0; i < len; i++) {
+        var first = (i == 0);
+        var last = ((i + 1) == len);
+        fn(arr[i], i, arr, first, last);
     }
 };
 exports.map = function(arr, fn) {
@@ -16,21 +37,6 @@ exports.map = function(arr, fn) {
         temp.push(fn(arr[i], i, arr));
     }
     return temp;
-};
-exports.isArray = function(arr) {
-    return Object.prototype.toString.call(arr) == '[object Array]';
-},
-exports.isObject = function(obj) {
-    return Object.prototype.toString.call(obj) == '[object Object]';
-},
-exports.isString = function(str) {
-    return Object.prototype.toString.call(obj) == '[object String]';
-};
-exports.isDate = function(date) {
-    return Object.prototype.toString.call(obj) == '[object Date]';
-};
-exports.isNumber = function(num) {
-    return Object.prototype.toString.call(obj) == '[object Number]';
 };
 exports.formatString = function(str, args) {
     return str.replace(/\{\d+\}/g, function(text) {
@@ -81,4 +87,135 @@ exports.clone = function(obj, skip, skipFunctions) {
         o[m] = exports.clone(obj[m], skip, skipFunctions);
     }
     return o;
+};
+exports.contains = function(item, searchValue) {
+    if (typeof(item) == 'string') {
+        if (item.indexOf(searchValue) !== -1) {
+            return true;
+        }
+    }
+    if (Array.isArray(item)) {
+        if (item.indexOf(searchValue) !== -1) {
+            return true;
+        }
+    }
+    return false;
+};
+exports.extend = function(target, source, rewrite) {
+    if (!target || !source) {
+        return target;
+    }
+    if (typeof(target) !== 'object' || typeof(source) !== 'object') {
+        return target;
+    }
+    if (rewrite === undefined) {
+        rewrite = true;
+    }
+    var keys = Object.keys(source);
+    var i = keys.length;
+    while (i--) {
+        var key = keys[i];
+        if (rewrite || target[key] === undefined) {
+            target[key] = exports.clone(source[key]);
+        }
+    }
+    return target;
+};
+exports.toQueryString = function(obj, base) { // FROM MooTools
+    var queryString = [];
+    Object.each(obj, function(v, k){
+        if (base) k = base + '[' + k + ']';
+        var result;
+        switch (typeOf(v)){
+            case 'object': result = Object.toQueryString(v, k); break;
+            case 'array':
+                var qs = {};
+                v.each(function(val, i){
+                    qs[i] = val;
+                });
+                result = Object.toQueryString(qs, k);
+                break;
+            default: result = k + '=' + encodeURIComponent(v);
+        }
+        if (v != null) queryString.push(result);
+    });
+    return queryString.join('&');
+};
+exports.argsToDebugString = function(args) {
+	var logs = '';
+	for (var i = 0; i < arguments.length; i++) {
+		var arg = arguments[i];
+		if (arg) {
+			if (typeof arg == 'object' || Array.isArray(arg)) {
+				if (Array.isArray(arg)) {
+					logs += 'Array(' + arg.length + '): \n';
+				}
+				else if (typeof arg == 'object') {
+					logs += 'Object: \n';
+				}
+				logs += JSON.stringify(arg, null, '\t');
+				logs += '\n';
+			}
+			else {
+				logs += arg;
+			}
+		}
+		else {
+			logs += ' ' + arg;
+		}
+	}
+	return logs;
+};
+exports.logDebug = function(/*...args*/) {
+	var log = exports.argsToDebugString.apply(this, arguments);
+	console.log(exports.name + ': ' + log);
+};
+exports.logInfo = function(str) {
+    console.log(exports.name + ': ' + str);
+};
+exports.logWarning = function(str) {
+    console.warn(exports.name + ': ' + str);
+};
+exports.camelToHyphen = function(str) {
+    return !str ? null : str.replace(/([A-Z])/g, function (g) {
+        return ('-' + g[0].toLowerCase());
+    }).slice(1);
+}
+exports.SID = (function(places) { // GENERATE UNIQUE IDS WITHIN ONE APP RUN (https://stackoverflow.com/a/6249043)
+    var chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+    var num = chars.length;
+    var len = 3;
+    var end = len - 1;
+    var arr = [];
+    var pointer = end;
+    var i;
+    for (i = 0; i < len; i++) {
+        arr[i] = 0;
+    }
+    return function() {
+        var shifted = false;
+        var last = arr[end];
+        var id = '';
+        for (i = 0; i < len; i++) {
+            id += chars[arr[i]];
+        }
+        if (last == (num - 1)) {
+            while (arr[pointer] == (num - 1)) {
+                arr[pointer] = 0;
+                pointer--;
+            }
+            if (pointer != -1) {
+                arr[pointer] = (arr[pointer] + 1) % num
+            }
+            pointer = end;
+            shifted = true;
+        }
+        if (!shifted) {
+            arr[pointer] = (arr[pointer] + 1) % num
+        }
+        return id;
+    };
+})();
+exports.UID = function() {
+    return Math.ceil(Date.now() / 1000) + '-' + exports.TID();
 };
