@@ -7,8 +7,8 @@
         <script src="../utils.min.js"></script>
     </head>
     <script>
-        YourModuleName.logInfo('Testing serial flow.');
-        var flow = new YourModuleName.SerialFlow();
+        NS.logInfo('Testing serial flow.');
+        var flow = new NS.SerialFlow();
         flow.push(function(id, next) {
             this.result.userA = {
                 id: id,
@@ -40,7 +40,7 @@
         //     this.result.user2 = user;
         // });
         flow.run(function(err, result) {
-            YourModuleName.logDebug('--> RESULT: ', result);
+            NS.logDebug('--> RESULT: ', result);
         });
         function findUser(userID, next) {
             getUser(userID, function(err, user) {

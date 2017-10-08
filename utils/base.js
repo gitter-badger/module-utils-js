@@ -1,6 +1,19 @@
 exports.name = 'your-module-name.js';
 exports.version = '1.0.0';
 exports.utilsVersion = '1.0.0';
+exports.SID = function(length) {
+    var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    var len = chars.length;
+    var lenID = typeof(length) ? length : 5;
+    var str = '';
+    for (var i = 0; i < lenID; i++) {
+        str += chars.charAt(Math.floor(Math.random() * len));
+    }
+    return str;
+};
+exports.UID = function() {
+    return Math.ceil(Date.now() / 1000) + '-' + exports.SID(3);
+};
 exports.objectKeys = function(obj) {
     var keys = [];
     var k;
@@ -181,41 +194,79 @@ exports.camelToHyphen = function(str) {
         return ('-' + g[0].toLowerCase());
     }).slice(1);
 }
-exports.SID = (function(places) { // GENERATE UNIQUE IDS WITHIN ONE APP RUN (https://stackoverflow.com/a/6249043)
-    var chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-    var num = chars.length;
-    var len = 3;
-    var end = len - 1;
-    var arr = [];
-    var pointer = end;
-    var i;
-    for (i = 0; i < len; i++) {
-        arr[i] = 0;
-    }
-    return function() {
-        var shifted = false;
-        var last = arr[end];
-        var id = '';
-        for (i = 0; i < len; i++) {
-            id += chars[arr[i]];
+/**
+ * @param {String|Error} problem
+ * @param {String} [message]
+ * Error passed: Set error.id = problem.message.
+ * String passed: Set error.id = problem.
+ */
+exports.ERROR = function(problem, message) {
+    var Co = function(problem, message) {
+        if (!problem) {
+            throw new Error('missingProblem');
         }
-        if (last == (num - 1)) {
-            while (arr[pointer] == (num - 1)) {
-                arr[pointer] = 0;
-                pointer--;
-            }
-            if (pointer != -1) {
-                arr[pointer] = (arr[pointer] + 1) % num
-            }
-            pointer = end;
-            shifted = true;
+        message = message || null;
+        if (problem instanceof Error) {
+            this.id = problem.message;
+            this.message = message;
         }
-        if (!shifted) {
-            arr[pointer] = (arr[pointer] + 1) % num
+        else if (typeof(problem) == 'string') {
+            this.id = problem;
+            this.message = message;
         }
-        return id;
+        else {
+            throw new Error('invalidProblem');
+        }
     };
-})();
-exports.UID = function() {
-    return Math.ceil(Date.now() / 1000) + '-' + exports.TID();
+    Co.prototype = {
+        throw: function() {
+            throw new Error(this.id);
+        },
+        toString: function() {
+            return JSON.stringify({
+                id: this.id,
+                message: this.message
+            }, null, '    ');
+        }
+    };
+    return new Co(problem, message);
+};
+exports.ErrorBuilder = function(errors) {
+    var Co = function() {
+        if (errors) {
+            if (!Array.isArray(errors)) {
+                throw new Error('invalidParameter');
+            }
+            for (var i = 0; i < errors.length; i++) {
+                if (!errors[i] || !(errors[i] instanceof ErrorPair)) {
+                    throw new Error('invalidArrayItem');
+                }
+            }
+        }
+        this.errors = errors || [];
+    };
+    Co.prototype = {
+        push: function(errorPair) {
+            this.errors.push(errorPair);
+        },
+        remove: function(id) {
+            var arr = this.errors;
+            var idx = -1;
+            for (var i = 0; i < arr.length; i++) {
+                if (arr[i].id == id) {
+                    idx = i;
+                }
+            }
+            if (idx > -1) {
+                arr.splice(idx, 1);
+            }
+        },
+        clear: function() {
+            this.errors = [];
+        },
+        toString: function() {
+            return JSON.stringify(this, null, '    ');
+        }
+    };
+    return new Co(errors);
 };

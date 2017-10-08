@@ -5,8 +5,8 @@ Storage for custom javascript utility functions (utils).
 Project contains compiler which generates following output:
 
 ```javascript
-var YourModuleName = {
-    name: 'YourModuleName',
+var NS = {
+    name: 'NS',
     version: '1.0.0',
     utilsVersion: '1.0.0',
     yourUtilityFunction1: // (function|object|date)
