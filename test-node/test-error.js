@@ -1,12 +1,12 @@
-var ERROR = require('../utils/base.js').ERROR;
+var error = require('../utils/base.js').error;
 var ErrorBuilder = require('../utils/base.js').ErrorBuilder;
 var errorBuilder = new ErrorBuilder();
 
-var err = new ERROR('BuggsBunny-name', 'Parameter ...');
+var err = error('BuggsBunny-name', 'Parameter ...');
 // console.log(err.throw());
 console.log(err.toString());
-errorBuilder.push(new ERROR('BuggsBunny-name', 'Parameter "name" is missing or has incorrect format.'));
-errorBuilder.push(new ERROR(new Error('BuggsBunny-carrots'), 'Parameter "carrots" is missing or has incorrect format.'));
+errorBuilder.push(error('BuggsBunny-name', 'Parameter "name" is missing or has incorrect format.'));
+errorBuilder.push(error(new Error('BuggsBunny-carrots'), 'Parameter "carrots" is missing or has incorrect format.'));
 console.log('Builder0: ', errorBuilder.toString());
 errorBuilder.remove('BuggsBunny-carrots');
 console.log('Builder1: ', errorBuilder.toString());

@@ -200,7 +200,7 @@ exports.camelToHyphen = function(str) {
  * Error passed: Set error.id = problem.message.
  * String passed: Set error.id = problem.
  */
-exports.ERROR = function(problem, message) {
+exports.error = function(problem, message) {
     var Co = function(problem, message) {
         if (!problem) {
             throw new Error('missingProblem');
