@@ -5,8 +5,8 @@ Storage for custom javascript utility functions (utils).
 Project contains compiler which generates following output:
 
 ```javascript
-var NS = {
-    name: 'NS',
+var U = {
+    name: 'DefaultModule',
     version: '1.0.0',
     utilsVersion: '1.0.0',
     yourUtilityFunction1: // (function|object|date)
@@ -33,8 +33,8 @@ So avoid making objects to wrap your utils.
 
 ## Compile command
 ENV variables:
-- `NAMESPACE` - **PascalCase** name of your module.
+- `MODULE` - **PascalCase** name of your module.
 To compile utilities run:
 ```
-    NAMESPACE="ContentEditor" node compile
+    MODULE="ContentEditor" node compile
 ```

@@ -1,10 +1,10 @@
-exports.name = 'your-module-name.js';
+exports.moduleName = 'DefaultModule';
 exports.version = '1.0.0';
 exports.utilsVersion = '1.0.0';
-exports.SID = function(length) {
+exports.SID = function(l) {
     var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     var len = chars.length;
-    var lenID = typeof(length) ? length : 5;
+    var lenID = (l && !isNaN(l)) ? l : 5;
     var str = '';
     for (var i = 0; i < lenID; i++) {
         str += chars.charAt(Math.floor(Math.random() * len));
@@ -51,11 +51,24 @@ exports.map = function(arr, fn) {
     }
     return temp;
 };
-exports.formatString = function(str, args) {
-    return str.replace(/\{\d+\}/g, function(text) {
-        var value = args[+text.substring(1, text.length - 1)];
-        return value === null ? '' : value;
-    });
+exports.filter = function(arr, fn) {
+    var acc = [];
+    for (var i = 0; i < arr.length; i++) {
+        if (fn.call(null, arr[i], i, arr)) {
+            acc.push(arr[i]);
+        }
+    }
+    return acc;
+};
+exports.reduce = function(arr, fn, initialVal) {
+    var acc = (initialVal === undefined) ? undefined : initialVal;
+    for (var i = 0; i < arr.length; i++) {
+        if (acc !== undefined)
+            acc = fn.call(undefined, acc, arr[i], i, arr);
+        else
+            acc = arr[i];
+    }
+    return acc;
 };
 exports.clone = function(obj, skip, skipFunctions) {
     if (!obj) {
@@ -179,21 +192,105 @@ exports.argsToDebugString = function(args) {
 	}
 	return logs;
 };
+exports.strFormat = function(str, args) {
+    return str.replace(/\{\d+\}/g, function(text) {
+        var value = args[+text.substring(1, text.length - 1)];
+        return value === null ? '' : value;
+    });
+};
+exports.strHyphenize = function(str) {
+    if (typeof(str) !== 'string') {
+        return null;
+    }
+    return str.replace(/\B([A-Z])/g, function (g) {
+        return ('-' + g[0]);
+    }).toLowerCase();
+};
+exports.strHtml = function(tag, obj) {
+    if (!tag || typeof(tag) != 'string') {
+        return '';
+    }
+    var pairables = ['area', 'base', 'br', 'col', 'command', 'embed', 'hr', 'img', 'input', 'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr'];
+    var str = '<' + tag;
+    if (!obj) { // Allow empty elements <p></p>
+        obj = {};
+    }
+    if (obj.id) {
+        str += ' id="' + obj.id + '"';
+    }
+    if (obj.classes && Array.isArray(obj.classes)) {
+        str += classesAsStr(obj);
+    }
+    if (obj.style && typeof(obj.data == 'object')) {
+        str += stylesAsStr(obj.style);
+    }
+    str += attrsAsStr(obj);
+    if (obj.data && typeof(obj.data) == 'object') {
+        str += dataAttrsAsStr(obj.data);
+    }
+    if (pairables.indexOf(tag) >= 0) {
+        return str + '/>';
+    }
+    str += '>';
+    str += obj.html;
+    str += '</' + tag + '>';
+    return str;
+    function classesAsStr(obj) {
+        var arr = obj.classes;
+        var str = '';
+        for (var i = 0; i < arr.length; i++) {
+            var v = arr[i];
+            if (v) {
+                v = '.' + v;
+            }
+        }
+        str = obj.classes.join(' ');
+        return (str.length > 0) ? (' class="' + str) + '"' : '';
+    }
+    function attrsAsStr(obj) {
+        obj = (typeof(obj) == 'object') ? obj : {};
+        var str = '';
+        for (var k in obj) {
+            if (['id', 'classes', 'style', 'data', 'html'].indexOf(k) >= 0) {
+                continue;
+            }
+            var attr = k + '="' + obj[k] + '"';
+            str += (str.length > 0) ? (' ' + attr) : attr;
+        }
+        return (str.length > 0) ? (' ' + str) : '';
+    }
+    function dataAttrsAsStr(obj) {
+        var str = '';
+        for (var k in obj) {
+            if (obj.hasOwnProperty(k)) {
+                var attr = 'data-' + k + '="' + obj[k] + '"';
+                str += (str.length > 0) ? (' ' + attr) : attr;
+            }
+        }
+        return (str.length > 0) ? (' ' + str) : '';
+    }
+    function stylesAsStr(obj) {
+        var str = '';
+        for (var k in obj) {
+            str += exports.strHyphenize(k) + ':' + obj[k] + ';';
+        }
+        return (str.length > 0) ? (' style="' + str + '"') : '';
+    }
+};
 exports.logDebug = function(/*...args*/) {
 	var log = exports.argsToDebugString.apply(this, arguments);
-	console.log(exports.name + ': ' + log);
+	console.log(exports.moduleName + ': ' + log);
 };
-exports.logInfo = function(str) {
-    console.log(exports.name + ': ' + str);
+exports.logInfo = function(/*...args*/) {
+    var args = [].slice.call(arguments);
+    args.unshift(exports.moduleName + ': ');
+    console.log.apply(null, args);
 };
-exports.logWarning = function(str) {
-    console.warn(exports.name + ': ' + str);
+exports.logWarn = function(/*...args*/) {
+    var args = [].slice.call(arguments);
+    args.unshift(exports.moduleName + ': ');
+    console.warn.apply(null, args);
 };
-exports.camelToHyphen = function(str) {
-    return !str ? null : str.replace(/([A-Z])/g, function (g) {
-        return ('-' + g[0].toLowerCase());
-    }).slice(1);
-}
 /**
  * @param {String|Error} problem
  * @param {String} [message]

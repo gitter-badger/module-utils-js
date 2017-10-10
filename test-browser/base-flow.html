@@ -7,8 +7,8 @@
         <script src="../utils.min.js"></script>
     </head>
     <script>
-        NS.logInfo('Testing serial flow.');
-        var flow = new NS.SerialFlow();
+        U.logInfo('Testing serial flow.');
+        var flow = new U.SerialFlow();
         flow.push(function(id, next) {
             this.result.userA = {
                 id: id,
@@ -17,7 +17,7 @@
             return next(null);
         }, 1);
         flow.push(function(id, next) {
-            console.log('--> OK id: ', id);
+            U.logInfo('ID: ', id);
             this.result.userB = {
                 id: id,
                 name: 'Joe'
@@ -28,7 +28,7 @@
         }, 2);
         // flow.push(findUser, 1);
         // flow.push(function(user) {
-        //     console.log('--> OK FOUND USER: ', user);
+        //     U.logInfo('--> OK FOUND USER: ', user);
         //     this.result.user = user;
         // });
         // flow.push(function(user) {
@@ -40,7 +40,7 @@
         //     this.result.user2 = user;
         // });
         flow.run(function(err, result) {
-            NS.logDebug('--> RESULT: ', result);
+            U.logDebug('RESULT: ', result);
         });
         function findUser(userID, next) {
             getUser(userID, function(err, user) {
@@ -59,14 +59,14 @@
             });
         }
         function getUser(id, next) {
-            console.log('--> FINDING USER: ', id);
+            U.logInfo('FINDING USER: ', id);
             return next(null, {
                 id: id,
                 name: 'Tomas'
             });
         }
         function getUserProject(id, next) {
-            console.log('--> OK FINDING USER PROJECT');
+            U.logInfo('FINDING USER PROJECT');
             return next(null, {
                 id: id,
                 name: 'TodoList'

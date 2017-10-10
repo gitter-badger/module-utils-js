@@ -1,41 +1,40 @@
 var fs = require('fs');
 var base = require('./utils/base.js');
-exports.compileUtils = function(filePaths, namespace) {
+exports.compileUtils = function(filePaths, accessVariable, moduleName) {
 	if (!Array.isArray(filePaths) || filePaths.length == 0) {
 		return;
 	}
-	str = 'var ' + namespace + ' = {\n';
+	str = 'var ' + accessVariable + ' = {\n';
 	filePaths.forEach(function(path) {
-		str += compileUtilsFromFile(path, namespace);
+		str += compileUtilsFromFile(path, accessVariable, moduleName);
 	});
 	str += '}\n';
 	fs.writeFileSync('./utils.min.js', str);
 };
-function compileUtilsFromFile(filePath, namespace) {
+function compileUtilsFromFile(filePath, accessVariable, moduleName) {
 	var temp = '';
 	var utils = require(filePath);
 	for (var k in utils) {
 		if (utils.hasOwnProperty(k)) {
 			var v = utils[k];
-			temp += '    ' + k + ': ' + compileModuleValue(k, v, namespace) + ',\n';
+			temp += '    ' + k + ': ' + compileModuleValue(k, v, accessVariable, moduleName) + ',\n';
 		}
 	}
 	return temp;
 }
-function compileModuleValue(key, value, namespace) {
+function compileModuleValue(key, value, accessVariable, moduleName) {
 	if (!value) {
 		return value;
 	}
 	if (typeof(value) == 'function') {
-		return stringifyScript(value.toString(), namespace);
+		return stringifyScript(value.toString(), accessVariable);
 	}
 	else if (typeof(value) == 'object') {
 		return compileModuleObjectValue(value);
 	}
 	else if (typeof(value) == 'string') {
-		if (key == 'name') {
-			// value = base.camelToHyphen(namespace) + '.js';
-			value = namespace;
+		if (key == 'moduleName') {
+			value = moduleName;
 		}
 		return "'" + value + "'";
 	}
@@ -46,23 +45,23 @@ function compileModuleValue(key, value, namespace) {
 		return value;
 	}
 }
-function compileModuleObjectValue(obj, namespace) { // REKURZIA
+function compileModuleObjectValue(obj, accessVariable) { // REKURZIA
 	if (obj instanceof Date) {
 		return obj.getTime();
 	}
 	var line = '{';
 	base.forIn(obj, function(k, v, first, last) {
-		v = compileModuleValue(k, v, namespace);
+		v = compileModuleValue(k, v, accessVariable);
 		line += k + ':' + v + (last == true ? '' : ',');
 	});
 	return line + '}';
 }
-function stringifyScript(input, namespace) {
+function stringifyScript(input, accessVariable) {
     var last = '';
 	return ('\n' + input + '\n').replace(/(?:(^|[-+\([{}=,:;!%^&*|?~]|\/(?![/*])|return|throw)(?:\s|\/\/[^\n]*\n|\/\*(?:[^*]|\*(?!\/))*\*\/)*(\/(?![/*])(?:\\[^\n]|[^[\n\/\\]|\[(?:\\[^\n]|[^\]])+)+\/)|(^|'(?:\\[\s\S]|[^\n'\\])*'|"(?:\\[\s\S]|[^\n"\\])*"|([0-9A-Za-z_$]+)|([-+]+)|.))(?:\s|\/\/[^\n]*\n|\/\*(?:[^*]|\*(?!\/))*\*\/)*/g, function (str, context, regexp, result, word, operator) {
 		if (word) {
-			if (namespace && word == 'exports') {
-				result = namespace;
+			if (accessVariable && word == 'exports') {
+				result = accessVariable;
 			}
 			result = (last == 'word' ? ' ' : (last == 'return' ? ' ' : '')) + result;
 			last = (word == 'return' || word == 'throw' || word == 'break' ? 'return' : 'word');

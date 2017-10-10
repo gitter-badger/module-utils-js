@@ -7,13 +7,13 @@
         <script src="../utils.min.js"></script>
     </head>
     <script>
-        console.log('--> SID: ', NS.SID());
-        console.log('--> SID: ', NS.SID());
-        console.log('--> SID: ', NS.SID());
-        console.log('--> UID: ', NS.UID());
-        console.log('--> UID: ', NS.UID());
-        console.log('--> UID: ', NS.UID());
-        console.log(NS.formatString('I go to {0} to buy some {1}', ['Tesco', 'Bananas']));
+        U.logInfo('SID1: ', U.SID(3));
+        U.logInfo('SID2: ', U.SID(3));
+        U.logInfo('SID3: ', U.SID());
+        U.logInfo('UID1:', U.UID());
+        U.logInfo('UID2:', U.UID());
+        U.logInfo('UID3:', U.UID());
+        U.logWarn(U.strFormat('I go to {0} to buy some {1}', ['Tesco', 'Bananas']));
     </script>
     <body>
 

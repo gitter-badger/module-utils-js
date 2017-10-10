@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title></title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script src="../utils.min.js"></script>
+    </head>
+    <script>
+        U.domReady(function() {
+            var html = U.strHtml('div', {
+                id: 1,
+                classes: ['btn', 'btn-primary'],
+                data: {
+                    rowID: 20
+                },
+                style: {
+                    display: 'inline-block',
+                    width: 100 + 'px',
+                    height: 50 + 'px',
+                    backgroundColor: 'purple',
+                    padding: 20 + 'px'
+                },
+                html: U.reduce(['pen', 'notebook', 'guitar'], getProductHtml, '')
+            });
+            function getProductHtml(acc, product) {
+                U.logInfo('acc: ', acc);
+                U.logInfo('product: ', product);
+                acc += U.strHtml('div', {
+                    id: 1,
+                    classes: ['product-item'],
+                    disabled: true,
+                    html: product
+                });
+                return acc;
+            };
+            U.logInfo('final html: ', html);
+            var el = U.domFind('#holder');
+            U.logInfo('el: ', el);
+            U.domHtml(el, html);
+        });
+    </script>
+    <body>
+        <div id="holder">
+            content
+        </div>
+    </body>
+</html>

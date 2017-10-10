@@ -59,9 +59,9 @@
                         return this.name;
                     },
                     calc: function() {
-                        console.log('--> some common logic 1');
+                        U.logInfo('Some common logic 1');
                         var result = this.implementor.calculate();
-                        console.log('--> some common logic 2');
+                        U.logInfo('Some common logic 2');
                         return result;
                     },
                     toJSON: function(str) {
@@ -98,8 +98,7 @@
             
         });
 
-
-        console.log(CustomNamespace.formatString('I go to {0} to buy some {1}', ['Tesco', 'Bananas']));
+        console.log(U.strFormat('I go to {0} to buy some {1}', ['Tesco', 'Bananas']));
     </script>
     <body>
 
