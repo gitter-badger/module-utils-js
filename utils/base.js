@@ -281,7 +281,7 @@ exports.logDebug = function(/*...args*/) {
 	var log = exports.argsToDebugString.apply(this, arguments);
 	console.log(exports.moduleName + ': ' + log);
 };
-exports.logInfo = function(/*...args*/) {
+exports.log = function(/*...args*/) {
     var args = [].slice.call(arguments);
     args.unshift(exports.moduleName + ': ');
     console.log.apply(null, args);

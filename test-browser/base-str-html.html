@@ -9,40 +9,72 @@
     <script>
         U.domReady(function() {
             var html = U.strHtml('div', {
-                id: 1,
-                classes: ['btn', 'btn-primary'],
+                id: 'products',
+                classes: ['area', 'area-products'],
                 data: {
                     rowID: 20
                 },
                 style: {
                     display: 'inline-block',
-                    width: 100 + 'px',
-                    height: 50 + 'px',
-                    backgroundColor: 'purple',
-                    padding: 20 + 'px'
+                    backgroundColor: 'gray',
+                    padding: '10px',
+                    width: '200px',
+                    overflow: 'hidden'
                 },
                 html: U.reduce(['pen', 'notebook', 'guitar'], getProductHtml, '')
             });
             function getProductHtml(acc, product) {
-                U.logInfo('acc: ', acc);
-                U.logInfo('product: ', product);
                 acc += U.strHtml('div', {
-                    id: 1,
                     classes: ['product-item'],
                     disabled: true,
-                    html: product
+                    html: product,
+                    style: {
+                        margin: '10px',
+                        padding: '10px',
+                        background: 'silver'
+                    }
                 });
                 return acc;
             };
-            U.logInfo('final html: ', html);
-            var el = U.domFind('#holder');
-            U.logInfo('el: ', el);
+            var el = U.domFind('#holder'); // Returns element if finding by id otherwise array of elements (not NodeList)
+            U.domStyle(el, 'margin-top', '200px');
+            U.domStyle(el, 'margin-left', '100px');
             U.domHtml(el, html);
+            // U.domOff('#products', 'click');
+            // Or bind event to element/s already in variable
+            el = U.domFind('#products');
+            U.domOn(el, 'click', function(e) {
+                U.log('event: ', e);
+                U.log('target: ', e.target);
+                U.log('currentTarget: ', e.currentTarget);
+                U.log('event bindeded to elements variable');
+                var els = U.domFind('.product-item');
+                U.forEach(els, function(el) {
+                    U.domStyle(el, 'background', 'blue');
+                });
+            });
+            U.domOn(el, 'click', function() {
+                U.log('--> OK 2');
+            });
+            U.domOn(el, 'mouseover', function() {
+                U.log('mouseover');
+            });
+            U.domAddClass('.product-item', 'product-item-active product-item-readonly');
+            // U.domOff(el, 'click');
+            setTimeout(function() {
+                U.domTriggerNativeEvent(el, 'click');
+                U.domVal('#input-1', 'Buggs Bunny');
+                U.domAttr('#input-1', 'disabled', true);
+                U.log(U.domVal('.input-group'));
+                U.domRemoveClass('.product-item', 'product-item product-item-active');
+            }, 3000);
         });
     </script>
     <body>
-        <div id="holder">
-            content
+        <div>
+            <input id="input-1" class="input-group" value="">
+            <input id="input-2" class="input-group" value="">
+            <div id="holder"></div>
         </div>
     </body>
 </html>

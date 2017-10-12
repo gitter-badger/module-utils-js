@@ -7,7 +7,7 @@
         <script src="../utils.min.js"></script>
     </head>
     <script>
-        U.logInfo('Testing serial flow.');
+        U.log('Testing serial flow.');
         var flow = new U.SerialFlow();
         flow.push(function(id, next) {
             this.result.userA = {
@@ -17,7 +17,7 @@
             return next(null);
         }, 1);
         flow.push(function(id, next) {
-            U.logInfo('ID: ', id);
+            U.log('ID: ', id);
             this.result.userB = {
                 id: id,
                 name: 'Joe'
@@ -28,7 +28,7 @@
         }, 2);
         // flow.push(findUser, 1);
         // flow.push(function(user) {
-        //     U.logInfo('--> OK FOUND USER: ', user);
+        //     U.log('--> OK FOUND USER: ', user);
         //     this.result.user = user;
         // });
         // flow.push(function(user) {
@@ -59,14 +59,14 @@
             });
         }
         function getUser(id, next) {
-            U.logInfo('FINDING USER: ', id);
+            U.log('FINDING USER: ', id);
             return next(null, {
                 id: id,
                 name: 'Tomas'
             });
         }
         function getUserProject(id, next) {
-            U.logInfo('FINDING USER PROJECT');
+            U.log('FINDING USER PROJECT');
             return next(null, {
                 id: id,
                 name: 'TodoList'

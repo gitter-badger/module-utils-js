@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title></title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script src="../utils.min.js"></script>
+        <style>
+            .box {
+                padding: 20px;
+                margin: 20px;
+            }
+            .bg-red {
+                background: red;
+            }
+            .bg-blue {
+                background: blue;
+            }
+            .bg-silver {
+                background: silver;
+            }
+            .hv-pointer {
+                cursor: pointer;
+            }
+        </style>
+        <script>
+            U.domReady(function() {
+                var els = U.domFind('.js-inner');
+                U.domOn(els, 'click', function() {
+                    U.log('Clicked!');
+                });
+                U.domOn('.js-inner', 'mouseover', function() {
+                    U.log('Over!');
+                });
+                U.domFadeTo('.js-inner', 0.2);
+                setTimeout(function() {
+                    U.domFadeTo('.js-inner', 0.7, 2000);
+                }, 1000);
+                setTimeout(function() {
+                    U.logWarn('Unbind');
+                    U.domOff('.js-inner', 'click');
+                    U.domRemoveClass('.js-inner', 'hv-pointer');
+                }, 3000);
+                setInterval(function() {
+                    U.domFadeToggle('.js-inner');
+                }, 5000);
+            });
+        </script>
+    </head>
+    <body>
+        <div id="js-outer" class="box bg-silver">
+            <div class="js-inner box bg-blue hv-pointer">el1</div>
+            <div class="js-inner box bg-red hv-pointer">el2</div>
+        </div>
+    </body>
+</html>
