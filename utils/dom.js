@@ -79,8 +79,7 @@ exports.domAddClass = function(sel, v) {
         els = [sel];
     }
     else {
-        els = exports.domFind(sel);
-        els = Array.isArray(els) ? els : [els];
+        els = Array.isArray(exports.domFind(sel)) ? els : [els];
     }
     if (Array.isArray(els)) {
         var len = els.length;
@@ -118,8 +117,7 @@ exports.domRemoveClass = function(sel, v) {
         els = [sel];
     }
     else {
-        els = exports.domFind(sel);
-        els = Array.isArray(els) ? els : [els];
+        els = Array.isArray(exports.domFind(sel)) ? els : [els];
     }
     if (Array.isArray(els)) {
         var len = els.length;
@@ -157,8 +155,7 @@ exports.domToggleClass = function(sel, v) {
         els = [sel];
     }
     else {
-        els = exports.domFind(sel);
-        els = Array.isArray(els) ? els : [els];
+        els = Array.isArray(exports.domFind(sel)) ? els : [els];
     }
     if (Array.isArray(els)) {
         var len = els.length;
@@ -191,8 +188,7 @@ exports.domVal = function(sel, v) {
         els = [sel];
     }
     else {
-        els = exports.domFind(sel);
-        els = Array.isArray(els) ? els : [els];
+        els = Array.isArray(exports.domFind(sel)) ? els : [els];
     }
     var arr = [];
     if (Array.isArray(els)) {
@@ -241,8 +237,7 @@ exports.domAttr = function(sel, k, v) {
         els = [sel];
     }
     else {
-        els = exports.domFind(sel);
-        els = Array.isArray(els) ? els : [els];
+        els = Array.isArray(exports.domFind(sel)) ? els : [els];
     }
     var arr = [];
     if (Array.isArray(els)) {
@@ -288,8 +283,7 @@ exports.domData = function(sel, k, v) {
         els = [sel];
     }
     else {
-        els = exports.domFind(sel);
-        els = Array.isArray(els) ? els : [els];
+        els = Array.isArray(exports.domFind(sel)) ? els : [els];
     }
     var arr = [];
     if (Array.isArray(els)) {
@@ -354,8 +348,7 @@ exports.domHtml = function(sel, v) {
         els = [sel];
     }
     else {
-        els = exports.domFind(sel);
-        els = Array.isArray(els) ? els : [els];
+        els = Array.isArray(exports.domFind(sel)) ? els : [els];
     }
     var arr = [];
     if (Array.isArray(els)) {
@@ -396,8 +389,7 @@ exports.domText = function(sel, v) {
         els = [sel];
     }
     else {
-        els = exports.domFind(sel);
-        els = Array.isArray(els) ? els : [els];
+        els = Array.isArray(exports.domFind(sel)) ? els : [els];
     }
     var arr = [];
     if (Array.isArray(els)) {
@@ -435,8 +427,7 @@ exports.domParent = function(sel) {
         els = [sel];
     }
     else {
-        els = exports.domFind(sel);
-        els = Array.isArray(els) ? els : [els];
+        els = Array.isArray(exports.domFind(sel)) ? els : [els];
     }
     var arr = [];
     if (Array.isArray(els)) {
@@ -465,8 +456,7 @@ exports.domChildren = function(sel) {
         els = [sel];
     }
     else {
-        els = exports.domFind(sel);
-        els = Array.isArray(els) ? els : [els];
+        els = Array.isArray(exports.domFind(sel)) ? els : [els];
     }
     var arr = [];
     if (Array.isArray(els)) {
@@ -500,8 +490,7 @@ exports.domSiblings = function(sel) {
         els = [sel];
     }
     else {
-        els = exports.domFind(sel);
-        els = Array.isArray(els) ? els : [els];
+        els = Array.isArray(exports.domFind(sel)) ? els : [els];
     }
     var arr = [];
     if (Array.isArray(els)) {
@@ -540,8 +529,7 @@ exports.domStyle = function(sel, k, v) {
         els = [sel];
     }
     else {
-        els = exports.domFind(sel);
-        els = Array.isArray(els) ? els : [els];
+        els = Array.isArray(exports.domFind(sel)) ? els : [els];
     }
     var arr = [];
     if (Array.isArray(els)) {
@@ -579,8 +567,7 @@ exports.domFadeIn = function(sel, t) {
         els = [sel];
     }
     else {
-        els = exports.domFind(sel);
-        els = Array.isArray(els) ? els : [els];
+        els = Array.isArray(exports.domFind(sel)) ? els : [els];
     }
     if (Array.isArray(els)) {
         for (var i = 0; i < els.length; i++) {
@@ -608,8 +595,7 @@ exports.domFadeOut = function(el, t) {
         els = [sel];
     }
     else {
-        els = exports.domFind(sel);
-        els = Array.isArray(els) ? els : [els];
+        els = Array.isArray(exports.domFind(sel)) ? els : [els];
     }
     if (Array.isArray(els)) {
         for (var i = 0; i < els.length; i++) {
@@ -636,7 +622,7 @@ exports.domFadeTo = function(sel, o, t) {
         els = [sel];
     }
     else {
-        els = exports.domFind(sel);
+        els = Array.isArray(exports.domFind(sel)) ? els : [els];
     }
     if (Array.isArray(els)) {
         var len = els.length;
@@ -661,7 +647,7 @@ exports.domFadeToggle = function(sel, t) {
         els = [sel];
     }
     else {
-        els = exports.domFind(sel);
+        els = Array.isArray(exports.domFind(sel)) ? els : [els];
     }
     if (Array.isArray(els)) {
         var len = els.length;
@@ -699,7 +685,7 @@ exports.domOn = function(sel, k, fn) {
         els = [sel];
     }
     else {
-        els = exports.domFind(sel);
+        els = Array.isArray(exports.domFind(sel)) ? els : [els];
     }
     if (Array.isArray(els)) {
         var len = els.length;
@@ -733,7 +719,7 @@ exports.domOff = function(sel, k) { // https://stackoverflow.com/a/4386514
         els = [sel];
     }
     else {
-        els = exports.domFind(sel);
+        els = Array.isArray(exports.domFind(sel)) ? els : [els];
     }
     if (Array.isArray(els)) {
         var len = els.length;
@@ -774,7 +760,7 @@ exports.domTriggerNativeEvent = function(sel, k) {
         els = [sel];
     }
     else {
-        els = exports.domFind(sel);
+        els = Array.isArray(exports.domFind(sel)) ? els : [els];
     }
     if (Array.isArray(els)) {
         var len = els.length;
@@ -803,7 +789,7 @@ exports.domTriggerEvent = function(sel, k, v) {
         els = [sel];
     }
     else {
-        els = exports.domFind(sel);
+        els = Array.isArray(exports.domFind(sel)) ? els : [els];
     }
     if (Array.isArray(els)) {
         var len = els.length;
@@ -825,5 +811,80 @@ exports.domTriggerEvent = function(sel, k, v) {
             e.initCustomEvent(k, true, true, v);
         }
         el.dispatchEvent(e);
+    }
+};
+exports.domAppend = function(sel, v) {
+    if (typeof(v) !== 'string') {
+        throw new Error('invalidParameter');
+    }
+    var els = null;
+    if (Array.isArray(sel)) {
+        els = sel;
+    }
+    else if (exports.isDomEl(sel)) {
+        els = [sel];
+    }
+    else {
+        els = Array.isArray(exports.domFind(sel)) ? els : [els];
+    }
+    if (Array.isArray(els)) {
+        for (var i = 0; i < els.length; i++) {
+            var el = els[i];
+            if (el) {
+                domAppend(el, v);
+            }
+        }
+    }
+    function domAppend(el, v) {
+        el.insertAdjacentHTML('beforeend', v);
+    }
+};
+exports.domPrepend = function(sel, v) {
+    if (typeof(v) !== 'string') {
+        throw new Error('invalidParameter');
+    }
+    var els = null;
+    if (Array.isArray(sel)) {
+        els = sel;
+    }
+    else if (exports.isDomEl(sel)) {
+        els = [sel];
+    }
+    else {
+        els = Array.isArray(exports.domFind(sel)) ? els : [els];
+    }
+    if (Array.isArray(els)) {
+        for (var i = 0; i < els.length; i++) {
+            var el = els[i];
+            if (el) {
+                domPrepend(el, v);
+            }
+        }
+    }
+    function domPrepend(el, v) {
+        el.insertAdjacentHTML('afterbegin', v);
+    }
+};
+exports.domRemove = function(sel) {
+    var els = null;
+    if (Array.isArray(sel)) {
+        els = sel;
+    }
+    else if (exports.isDomEl(sel)) {
+        els = [sel];
+    }
+    else {
+        els = Array.isArray(exports.domFind(sel)) ? els : [els];
+    }
+    if (Array.isArray(els)) {
+        for (var i = 0; i < els.length; i++) {
+            var el = els[i];
+            if (el) {
+                domRemove(el);
+            }
+        }
+    }
+    function domRemove(el) {
+        el.parentNode.removeChild(el);
     }
 };
