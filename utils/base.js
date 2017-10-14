@@ -30,14 +30,14 @@ exports.objectKeys = function(obj) {
     }
     return keys;
 };
-exports.forIn = function(object, fn) {
-    var len = exports.objectKeys(object).length;
+exports.forIn = function(obj, fn) {
+    var len = exports.objectKeys(obj).length;
     var i = 0;
-    for (var key in object) {
-        if (object.hasOwnProperty(key)) {
+    for (var k in obj) {
+        if (obj.hasOwnProperty(k)) {
             var first = (i == 0);
             var last = ((i + 1) == len);
-            fn(key, object[key], first, last);
+            fn(k, obj[k], first, last);
             i++;
         }
     }
@@ -51,11 +51,11 @@ exports.forEach = function(arr, fn) {
     }
 };
 exports.map = function(arr, fn) {
-    var temp = [];
+    var arr = [];
     for (var i = 0; i < this.length; i++) {
-        temp.push(fn(arr[i], i, arr));
+        arr.push(fn(arr[i], i, arr));
     }
-    return temp;
+    return arr;
 };
 exports.filter = function(arr, fn) {
     var acc = [];
@@ -128,56 +128,59 @@ exports.clone = function(obj, skip, skipFunctions) {
     }
     return o;
 };
-exports.contains = function(item, searchValue) {
-    if (typeof(item) == 'string') {
-        if (item.indexOf(searchValue) !== -1) {
-            return true;
-        }
+exports.contains = function(arrOrStr, v) {
+    if (!arrOrStr) {
+        throw new Error('invalidParameter');
     }
-    if (Array.isArray(item)) {
-        if (item.indexOf(searchValue) !== -1) {
-            return true;
-        }
+    if (typeof(arrOrStr) !== 'string' && !Array.isArray(arrOrStr)) {
+        throw new Error('invalidParameter');
     }
-    return false;
+    return (arrOrStr.indexOf(v) !== -1);
 };
-exports.extend = function(target, source, rewrite) {
-    if (!target || !source) {
-        return target;
+exports.extend = function(base, obj, rewrite) {
+    if (!base || !obj) {
+        return base;
     }
-    if (typeof(target) !== 'object' || typeof(source) !== 'object') {
-        return target;
+    if (typeof(base) !== 'object' || typeof(obj) !== 'object') {
+        return base;
     }
     if (rewrite === undefined) {
         rewrite = true;
     }
-    var keys = Object.keys(source);
+    var keys = Object.keys(obj);
     var i = keys.length;
     while (i--) {
         var key = keys[i];
-        if (rewrite || target[key] === undefined) {
-            target[key] = exports.clone(source[key]);
+        if (rewrite || base[key] === undefined) {
+            base[key] = exports.clone(obj[key]);
         }
     }
-    return target;
+    return base;
 };
-exports.toQueryString = function(obj, base) { // FROM MooTools
+exports.toQueryString = function(obj, base) { // From MooTools
     var queryString = [];
-    Object.each(obj, function(v, k){
-        if (base) k = base + '[' + k + ']';
-        var result;
-        switch (typeOf(v)){
-            case 'object': result = Object.toQueryString(v, k); break;
+    Object.each(obj, function(v, k) {
+        if (base) {
+            k = base + '[' + k + ']';
+        }
+        var result = null;
+        switch (typeof(v)) {
+            case 'object':
+                result = Object.toQueryString(v, k);
+                break;
             case 'array':
                 var qs = {};
-                v.each(function(val, i){
+                v.each(function(val, i) {
                     qs[i] = val;
                 });
                 result = Object.toQueryString(qs, k);
                 break;
-            default: result = k + '=' + encodeURIComponent(v);
+            default:
+                result = k + '=' + encodeURIComponent(v);
         }
-        if (v != null) queryString.push(result);
+        if (v != null) {
+            queryString.push(result);
+        }
     });
     return queryString.join('&');
 };
