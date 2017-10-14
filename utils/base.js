@@ -1,6 +1,12 @@
 exports.moduleName = 'DefaultModule';
 exports.version = '1.0.0';
 exports.utilsVersion = '1.0.0';
+exports.lan = {
+    SK: 'SK',
+    CZ: 'CZ',
+    EN: 'EN',
+    DE: 'DE'
+};
 exports.SID = function(l) {
     var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     var len = chars.length;
@@ -23,7 +29,7 @@ exports.objectKeys = function(obj) {
         }
     }
     return keys;
-}
+};
 exports.forIn = function(object, fn) {
     var len = exports.objectKeys(object).length;
     var i = 0;
@@ -59,6 +65,14 @@ exports.filter = function(arr, fn) {
         }
     }
     return acc;
+};
+exports.find = function(arr, fn) {
+    for (var i = 0; i < arr.length; i++) {
+        if (fn.call(null, arr[i], i, arr)) {
+            return arr[i];
+        }
+    }
+    return null;
 };
 exports.reduce = function(arr, fn, initialVal) {
     var acc = (initialVal === undefined) ? undefined : initialVal;
@@ -329,13 +343,13 @@ exports.error = function(problem, message) {
     return new Co(problem, message);
 };
 exports.ErrorBuilder = function(errors) {
-    var Co = function() {
+    var Co = function(errors) {
         if (errors) {
             if (!Array.isArray(errors)) {
                 throw new Error('invalidParameter');
             }
             for (var i = 0; i < errors.length; i++) {
-                if (!errors[i] || !(errors[i] instanceof ErrorPair)) {
+                if (!errors[i] || !errors[i].id) {
                     throw new Error('invalidArrayItem');
                 }
             }
@@ -343,8 +357,8 @@ exports.ErrorBuilder = function(errors) {
         this.errors = errors || [];
     };
     Co.prototype = {
-        push: function(errorPair) {
-            this.errors.push(errorPair);
+        push: function(err) {
+            this.errors.push(err);
         },
         remove: function(id) {
             var arr = this.errors;
@@ -361,9 +375,188 @@ exports.ErrorBuilder = function(errors) {
         clear: function() {
             this.errors = [];
         },
+        hasError: function(id) {
+            var arr = this.errors;
+            if (id) {
+                for (var i = 0; i < arr.length; i++) {
+                    if (arr[i] && arr[i].id == id) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            return arr.length > 0;
+        },
+        throwFirst: function() {
+            if (this.errors.length <= 0) {
+                throw new Error('emptyErrorBuilder');
+            }
+            this.errors[0].throw();
+        },
+        first: function() {
+            return this.errors[0] || null;
+        },
+        last: function() {
+            return this.errors[this.errors.length - 1] || null;
+        },
         toString: function() {
             return JSON.stringify(this, null, '    ');
         }
     };
     return new Co(errors);
+};
+exports.Schema = function(fn) {
+    var Co = function(fn) {
+        this.rule = {};
+        this.__control = null;
+        fn.apply(null, [
+            attr.bind(this),
+            attrError.bind(this),
+            attrValidate.bind(this),
+            func.bind(this),
+            funcError.bind(this)
+        ]);
+    };
+    Co.prototype = {
+        validate: function(obj, lan) { // Can be called without normalize.
+            var eb = new exports.ErrorBuilder();
+            for (var k in this.rule) {
+                if (this.rule.hasOwnProperty(k)) {
+                    var v = obj[k];
+                    var rule = this.rule[k];
+                    var mes = rule.message[lan] || rule.message['default'] || ('Invalid property "' + k + '".');
+                    if (rule.required) {
+                        if (rule.type === '[object Number]') {
+                            if (!v && v !== 0) {
+                                eb.push(exports.error(k, mes));
+                            }
+                        }
+                        else {
+                            if (!v) {
+                                eb.push(exports.error(k, mes));
+                            }
+                        }
+                    }
+                    if (v && Object.prototype.toString.call(v) !== rule.type) {
+                        eb.push(exports.error(k, mes));
+                    }
+                    if (v && rule.validate && !rule.validate(v)) {
+                        eb.push(exports.error(k, mes));
+                    }
+                }
+            }
+            return eb;
+        },
+        /**
+         * Does not validates.
+         * In case of type missmatch assigns empty value.
+         * In case of empty value use normalized empty value.
+         *
+         * - (nonExisting|typeMissmatch) attr {String|Object|Date|Number} -> null
+         * - (nonExisting|typeMissmatch) attr {Array} -> []
+         * - (nonExisting|typeMissmatch) func -> function() {}
+         */
+        normalize: function(obj) {
+            var norm = {};
+            for (var k in this.rule) {
+                if (this.rule.hasOwnProperty(k)) {
+                    var rule = this.rule[k];
+                    var val = obj[k];
+                    var typ = Object.prototype.toString.call(val);
+                    if (!val || typ !== rule.type) {
+                        if (rule.type === '[object Array]') {
+                            norm[k] = [];
+                        }
+                        else if (rule.type == '[object Function]') {
+                            norm[k] = function() {};
+                        }
+                        else {
+                            norm[k] = null;
+                        }
+                    }
+                    else {
+                        norm[k] = val;
+                    }
+                }
+            }
+            return norm;
+        }
+    };
+    function attr(name, type, required) { // Starts attribute definition
+        if (!name || typeof(name) !== 'string') {
+            throw new Error('invalidParameter');
+        }
+        type = strType(type);
+        if (!type || typeof(required) !== 'boolean') {
+            throw new Error('invalidParameter');
+        }
+        this.__control = name;
+        this.rule[this.__control] = {
+            type: type,
+            required: required,
+            message: {
+                default: 'Invalid attribute "' + name + '".'
+            }
+        };
+    }
+    function func(name) { // Starts function definition
+        if (!name || typeof(name) !== 'string') {
+            throw new Error('invalidParameter');
+        }
+        this.__control = name;
+        this.rule[this.__control] = {
+            type: '[object Function]',
+            required: true,
+            message: {
+                default: 'Invalid function "' + name + '".'
+            }
+        };
+    }
+    var attrError = funcError = function(a, b) { // Sets default or localized error message.
+        if (!a || typeof(a) !== 'string') {
+            throw new Error('invalidParameter');
+        }
+        if (b && typeof(b) !== 'string') {
+            throw new Error('invalidParameter');
+        }
+        var lan = (a && b) ? a : 'default';
+        var mes = (a && b) ? b : a;
+        if (!this.rule[this.__control]) {
+            throw new Error('invalidOrder');
+        }
+        if (!this.rule[this.__control].message) {
+            this.rule[this.__control].message = {};
+        }
+        this.rule[this.__control].message[lan] = mes;
+    }
+    function attrValidate(fn) {
+        if (!fn || typeof(fn) !== 'function') {
+            throw new Error('invalidParameter');
+        }
+        if (!this.rule[this.__control]) {
+            throw new Error('invalidOrder');
+        }
+        this.rule[this.__control].validate = fn;
+    }
+    function strType(type) {
+        if (type === Number) {
+            return '[object Number]';
+        }
+        else if (type === String) {
+            return '[object String]';
+        }
+        else if (type === Array) {
+            return '[object Array]';
+        }
+        else if (type === Date) {
+            return '[object Date]';
+        }
+        else if (type === Object) {
+            return '[object Object]';
+        }
+        else {
+            null;
+        }
+    }
+    return new Co(fn);
 };
