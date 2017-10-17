@@ -10,7 +10,7 @@ exports.domReady = function(fn) {
     }
 };
 exports.isDomEl = function(el) {
-    return (el instanceof Element);
+    return (el instanceof Element || el instanceof HTMLDocument);
 };
 /**
  * @param {String} sel
@@ -51,8 +51,14 @@ exports.domFind = function(sel, el) {
         return [];
     }
     function selectingOne(sel) {
-        var parts = sel.split(/\s+/);
-        return (parts && parts.length == 1 && parts[0][0] == '#');
+        if (U.isDomEl(sel)) {
+            return true;
+        }
+        else if (typeof(sel) === 'string') {
+            var parts = sel.split(/\s+/);
+            return (parts && parts.length == 1 && parts[0][0] == '#');
+        }
+        return false;
     }
 };
 exports.domHasClass = function(el, name) {
@@ -68,6 +74,9 @@ exports.domHasClass = function(el, name) {
     }
 };
 exports.domAddClass = function(sel, v) {
+    if (!sel) {
+        throw new Error('invalidParameter');
+    }
     if (!v || typeof(v) !== 'string') {
         return new Error('invalidParameter');
     }
@@ -79,7 +88,8 @@ exports.domAddClass = function(sel, v) {
         els = [sel];
     }
     else {
-        els = Array.isArray(exports.domFind(sel)) ? els : [els];
+        els = exports.domFind(sel);
+        els = Array.isArray(els) ? els : [els];
     }
     if (Array.isArray(els)) {
         var len = els.length;
@@ -117,7 +127,8 @@ exports.domRemoveClass = function(sel, v) {
         els = [sel];
     }
     else {
-        els = Array.isArray(exports.domFind(sel)) ? els : [els];
+        els = exports.domFind(sel);
+        els = Array.isArray(els) ? els : [els];
     }
     if (Array.isArray(els)) {
         var len = els.length;
@@ -144,6 +155,9 @@ exports.domRemoveClass = function(sel, v) {
     }
 },
 exports.domToggleClass = function(sel, v) {
+    if (!sel) {
+        throw new Error('invalidParameter');
+    }
     if (!v || typeof(v) !== 'string') {
         return new Error('invalidParameter');
     }
@@ -155,7 +169,8 @@ exports.domToggleClass = function(sel, v) {
         els = [sel];
     }
     else {
-        els = Array.isArray(exports.domFind(sel)) ? els : [els];
+        els = exports.domFind(sel);
+        els = Array.isArray(els) ? els : [els];
     }
     if (Array.isArray(els)) {
         var len = els.length;
@@ -177,6 +192,9 @@ exports.domToggleClass = function(sel, v) {
     }
 };
 exports.domVal = function(sel, v) {
+    if (!sel) {
+        throw new Error('invalidParameter');
+    }
     if (v && typeof(v) !== 'string' && isNaN(v)) {
         return new Error('invalidParameter');
     }
@@ -188,7 +206,8 @@ exports.domVal = function(sel, v) {
         els = [sel];
     }
     else {
-        els = Array.isArray(exports.domFind(sel)) ? els : [els];
+        els = exports.domFind(sel);
+        els = Array.isArray(els) ? els : [els];
     }
     var arr = [];
     if (Array.isArray(els)) {
@@ -218,11 +237,20 @@ exports.domVal = function(sel, v) {
         }
     }
     function selectingOne(sel) {
-        var parts = sel.split(/\s+/);
-        return (parts && parts.length == 1 && parts[0][0] == '#');
+        if (U.isDomEl(sel)) {
+            return true;
+        }
+        else if (typeof(sel) === 'string') {
+            var parts = sel.split(/\s+/);
+            return (parts && parts.length == 1 && parts[0][0] == '#');
+        }
+        return false;
     }
 };
 exports.domAttr = function(sel, k, v) {
+    if (!sel) {
+        throw new Error('invalidParameter');
+    }
     if (!k || typeof(k) !== 'string') {
         throw new Error('invalidParameter');
     }
@@ -237,7 +265,8 @@ exports.domAttr = function(sel, k, v) {
         els = [sel];
     }
     else {
-        els = Array.isArray(exports.domFind(sel)) ? els : [els];
+        els = exports.domFind(sel);
+        els = Array.isArray(els) ? els : [els];
     }
     var arr = [];
     if (Array.isArray(els)) {
@@ -256,17 +285,32 @@ exports.domAttr = function(sel, k, v) {
     }
     return selectingOne(sel) ? arr[0] : arr;
     function getAttr(el, k) {
-        return el.getAttribute(k) || null;
+        var v = el.getAttribute(k) || null;
+        if (v) {
+            return v;
+        }
+        else {
+            return el.hasAttribute(k);
+        }
     }
     function setAttr(el, k, v) {
-        el.setAttribute(k, v);
+        el.setAttribute(k, '' + v);
     }
     function selectingOne(sel) {
-        var parts = sel.split(/\s+/);
-        return (parts && parts.length == 1 && parts[0][0] == '#');
+        if (U.isDomEl(sel)) {
+            return true;
+        }
+        else if (typeof(sel) === 'string') {
+            var parts = sel.split(/\s+/);
+            return (parts && parts.length == 1 && parts[0][0] == '#');
+        }
+        return false;
     }
 };
 exports.domData = function(sel, k, v) {
+    if (!sel) {
+        throw new Error('invalidParameter');
+    }
     if (!k || typeof(k) !== 'string') {
         throw new Error('invalidParameter');
     }
@@ -283,7 +327,8 @@ exports.domData = function(sel, k, v) {
         els = [sel];
     }
     else {
-        els = Array.isArray(exports.domFind(sel)) ? els : [els];
+        els = exports.domFind(sel);
+        els = Array.isArray(els) ? els : [els];
     }
     var arr = [];
     if (Array.isArray(els)) {
@@ -302,10 +347,21 @@ exports.domData = function(sel, k, v) {
     }
     return selectingOne(sel) ? arr[0] : arr;
     function getData(el, k) {
+        if (el.__elementData[k]) {
+            return el.__elementData[k];
+        }
         return el.dataset[k] || null;
     }
     function setData(el, k, v) {
-        el.dataset[k] = v;
+        if (typeof(v) === 'string') {
+            el.dataset[k] = v;
+        }
+        else {
+            if (!el.__elementData) {
+                el.__elementData = {};
+            }
+            el.__elementData[k] = v;
+        }
     }
     function normalizeVal(v) {
         if (v === undefined) {
@@ -318,11 +374,7 @@ exports.domData = function(sel, k, v) {
             if (!v) {
                 return null;
             }
-            try {
-                return JSON.stringify(v);
-            } catch (err) {
-                throw new Error('invalidParameter');
-            }
+            return v;
         }
         else if (v && typeof(v.toString) == 'function') {
             return v.toString();
@@ -332,11 +384,20 @@ exports.domData = function(sel, k, v) {
         }
     }
     function selectingOne(sel) {
-        var parts = sel.split(/\s+/);
-        return (parts && parts.length == 1 && parts[0][0] == '#');
+        if (U.isDomEl(sel)) {
+            return true;
+        }
+        else if (typeof(sel) === 'string') {
+            var parts = sel.split(/\s+/);
+            return (parts && parts.length == 1 && parts[0][0] == '#');
+        }
+        return false;
     }
 };
 exports.domHtml = function(sel, v) {
+    if (!sel) {
+        throw new Error('invalidParameter');
+    }
     if (v && typeof(v) !== 'string') {
         return new Error('invalidParameter');
     }
@@ -348,7 +409,8 @@ exports.domHtml = function(sel, v) {
         els = [sel];
     }
     else {
-        els = Array.isArray(exports.domFind(sel)) ? els : [els];
+        els = exports.domFind(sel);
+        els = Array.isArray(els) ? els : [els];
     }
     var arr = [];
     if (Array.isArray(els)) {
@@ -373,11 +435,20 @@ exports.domHtml = function(sel, v) {
         el.innerHTML = v;
     }
     function selectingOne(sel) {
-        var parts = sel.split(/\s+/);
-        return (parts && parts.length == 1 && parts[0][0] == '#');
+        if (U.isDomEl(sel)) {
+            return true;
+        }
+        else if (typeof(sel) === 'string') {
+            var parts = sel.split(/\s+/);
+            return (parts && parts.length == 1 && parts[0][0] == '#');
+        }
+        return false;
     }
 };
 exports.domText = function(sel, v) {
+    if (!sel) {
+        throw new Error('invalidParameter');
+    }
     if (v && typeof(v) !== 'string') {
         return new Error('invalidParameter');
     }
@@ -389,12 +460,13 @@ exports.domText = function(sel, v) {
         els = [sel];
     }
     else {
-        els = Array.isArray(exports.domFind(sel)) ? els : [els];
+        els = exports.domFind(sel);
+        els = Array.isArray(els) ? els : [els];
     }
     var arr = [];
     if (Array.isArray(els)) {
-        for (var i = 0; i < arr.length; i++) {
-            var el = arr[i];
+        for (var i = 0; i < els.length; i++) {
+            var el = els[i];
             if (!el) {
                 continue;
             }
@@ -414,11 +486,20 @@ exports.domText = function(sel, v) {
         el.textContent = v;
     }
     function selectingOne(sel) {
-        var parts = sel.split(/\s+/);
-        return (parts && parts.length == 1 && parts[0][0] == '#');
+        if (U.isDomEl(sel)) {
+            return true;
+        }
+        else if (typeof(sel) === 'string') {
+            var parts = sel.split(/\s+/);
+            return (parts && parts.length == 1 && parts[0][0] == '#');
+        }
+        return false;
     }
 };
 exports.domParent = function(sel) {
+    if (!sel) {
+        throw new Error('invalidParameter');
+    }
     var els = null;
     if (Array.isArray(sel)) {
         els = sel;
@@ -427,12 +508,13 @@ exports.domParent = function(sel) {
         els = [sel];
     }
     else {
-        els = Array.isArray(exports.domFind(sel)) ? els : [els];
+        els = exports.domFind(sel);
+        els = Array.isArray(els) ? els : [els];
     }
     var arr = [];
     if (Array.isArray(els)) {
-        for (var i = 0; i < arr.length; i++) {
-            var el = arr[i];
+        for (var i = 0; i < els.length; i++) {
+            var el = els[i];
             if (el) {
                 arr.push(getParent(el));
             }
@@ -443,11 +525,20 @@ exports.domParent = function(sel) {
         return el.parentNode || null;
     }
     function selectingOne(sel) {
-        var parts = sel.split(/\s+/);
-        return (parts && parts.length == 1 && parts[0][0] == '#');
+        if (U.isDomEl(sel)) {
+            return true;
+        }
+        else if (typeof(sel) === 'string') {
+            var parts = sel.split(/\s+/);
+            return (parts && parts.length == 1 && parts[0][0] == '#');
+        }
+        return false;
     }
 };
 exports.domChildren = function(sel) {
+    if (!sel) {
+        throw new Error('invalidParameter');
+    }
     var els = null;
     if (Array.isArray(sel)) {
         els = sel;
@@ -456,7 +547,8 @@ exports.domChildren = function(sel) {
         els = [sel];
     }
     else {
-        els = Array.isArray(exports.domFind(sel)) ? els : [els];
+        els = exports.domFind(sel);
+        els = Array.isArray(els) ? els : [els];
     }
     var arr = [];
     if (Array.isArray(els)) {
@@ -477,11 +569,20 @@ exports.domChildren = function(sel) {
         return arr;
     }
     function selectingOne(sel) {
-        var parts = sel.split(/\s+/);
-        return (parts && parts.length == 1 && parts[0][0] == '#');
+        if (U.isDomEl(sel)) {
+            return true;
+        }
+        else if (typeof(sel) === 'string') {
+            var parts = sel.split(/\s+/);
+            return (parts && parts.length == 1 && parts[0][0] == '#');
+        }
+        return false;
     }
 };
 exports.domSiblings = function(sel) {
+    if (!sel) {
+        throw new Error('invalidParameter');
+    }
     var els = null;
     if (Array.isArray(sel)) {
         els = sel;
@@ -490,12 +591,13 @@ exports.domSiblings = function(sel) {
         els = [sel];
     }
     else {
-        els = Array.isArray(exports.domFind(sel)) ? els : [els];
+        els = exports.domFind(sel);
+        els = Array.isArray(els) ? els : [els];
     }
     var arr = [];
     if (Array.isArray(els)) {
-        for (var i = 0; i < arr.length; i++) {
-            var el = arr[i];
+        for (var i = 0; i < els.length; i++) {
+            var el = els[i];
             if (el) {
                 arr.push(getSiblings(el));
             }
@@ -514,11 +616,8 @@ exports.domSiblings = function(sel) {
         return arr;
     }
 };
-exports.domStyle = function(sel, k, v) {
-    if (!k || typeof(k) !== 'string') {
-        throw new Error('invalidParameter');
-    }
-    if (v && typeof(v) !== 'string') {
+exports.domPrev = function(sel) {
+    if (!sel) {
         throw new Error('invalidParameter');
     }
     var els = null;
@@ -529,7 +628,53 @@ exports.domStyle = function(sel, k, v) {
         els = [sel];
     }
     else {
-        els = Array.isArray(exports.domFind(sel)) ? els : [els];
+        els = exports.domFind(sel);
+        els = Array.isArray(els) ? els : [els];
+    }
+    var arr = [];
+    if (Array.isArray(els)) {
+        for (var i = 0; i < els.length; i++) {
+            var el = els[i];
+            if (el) {
+                arr.push(getPrev(el));
+            }
+        }
+    }
+    return selectingOne(sel) ? arr[0] : arr;
+    function getPrev(el) {
+        return el.previousElementSibling || null;
+    }
+    function selectingOne(sel) {
+        if (U.isDomEl(sel)) {
+            return true;
+        }
+        else if (typeof(sel) === 'string') {
+            var parts = sel.split(/\s+/);
+            return (parts && parts.length == 1 && parts[0][0] == '#');
+        }
+        return false;
+    }
+};
+exports.domStyle = function(sel, k, v) {
+    if (!sel) {
+        throw new Error('invalidParameter');
+    }
+    if (!k || typeof(k) !== 'string') {
+        throw new Error('invalidParameter');
+    }
+    if (v && (typeof(v) !== 'string' && isNaN(v))) {
+        throw new Error('invalidParameter');
+    }
+    var els = null;
+    if (Array.isArray(sel)) {
+        els = sel;
+    }
+    else if (exports.isDomEl(sel)) {
+        els = [sel];
+    }
+    else {
+        els = exports.domFind(sel);
+        els = Array.isArray(els) ? els : [els];
     }
     var arr = [];
     if (Array.isArray(els)) {
@@ -554,11 +699,20 @@ exports.domStyle = function(sel, k, v) {
         el.style[k] = v;
     }
     function selectingOne(sel) {
-        var parts = sel.split(/\s+/);
-        return (parts && parts.length == 1 && parts[0][0] == '#');
+        if (U.isDomEl(sel)) {
+            return true;
+        }
+        else if (typeof(sel) === 'string') {
+            var parts = sel.split(/\s+/);
+            return (parts && parts.length == 1 && parts[0][0] == '#');
+        }
+        return false;
     }
 };
 exports.domFadeIn = function(sel, t) {
+    if (!sel) {
+        throw new Error('invalidParameter');
+    }
     var els = null;
     if (Array.isArray(sel)) {
         els = sel;
@@ -567,7 +721,8 @@ exports.domFadeIn = function(sel, t) {
         els = [sel];
     }
     else {
-        els = Array.isArray(exports.domFind(sel)) ? els : [els];
+        els = exports.domFind(sel);
+        els = Array.isArray(els) ? els : [els];
     }
     if (Array.isArray(els)) {
         for (var i = 0; i < els.length; i++) {
@@ -579,14 +734,23 @@ exports.domFadeIn = function(sel, t) {
     }
     function fadeIn(el, t) {
         el.style.transition = 'opacity ' + (t && !isNaN(t) && t > 0 ? t : 250) + 'ms';
-        el.style.opacity = '0';
+        el.style.opacity = '1';
     }
     function selectingOne(sel) {
-        var parts = sel.split(/\s+/);
-        return (parts && parts.length == 1 && parts[0][0] == '#');
+        if (U.isDomEl(sel)) {
+            return true;
+        }
+        else if (typeof(sel) === 'string') {
+            var parts = sel.split(/\s+/);
+            return (parts && parts.length == 1 && parts[0][0] == '#');
+        }
+        return false;
     }
 };
-exports.domFadeOut = function(el, t) {
+exports.domFadeOut = function(sel, t) {
+    if (!sel) {
+        throw new Error('invalidParameter');
+    }
     var els = null;
     if (Array.isArray(sel)) {
         els = sel;
@@ -595,7 +759,8 @@ exports.domFadeOut = function(el, t) {
         els = [sel];
     }
     else {
-        els = Array.isArray(exports.domFind(sel)) ? els : [els];
+        els = exports.domFind(sel);
+        els = Array.isArray(els) ? els : [els];
     }
     if (Array.isArray(els)) {
         for (var i = 0; i < els.length; i++) {
@@ -607,10 +772,13 @@ exports.domFadeOut = function(el, t) {
     }
     function fadeOut(el, t) {
         el.style.transition = 'opacity ' + (t && !isNaN(t) && t > 0 ? t : 250) + 'ms';
-        el.style.opacity = '1';
+        el.style.opacity = '0';
     }
 };
 exports.domFadeTo = function(sel, o, t) {
+    if (!sel) {
+        throw new Error('invalidParameter');
+    }
     if (!o || isNaN(o) || o > 100 || o < 0) {
         throw new Error('invalidParameter');
     }
@@ -622,7 +790,8 @@ exports.domFadeTo = function(sel, o, t) {
         els = [sel];
     }
     else {
-        els = Array.isArray(exports.domFind(sel)) ? els : [els];
+        els = exports.domFind(sel);
+        els = Array.isArray(els) ? els : [els];
     }
     if (Array.isArray(els)) {
         var len = els.length;
@@ -639,6 +808,9 @@ exports.domFadeTo = function(sel, o, t) {
     }
 };
 exports.domFadeToggle = function(sel, t) {
+    if (!sel) {
+        throw new Error('invalidParameter');
+    }
     var els = null;
     if (Array.isArray(sel)) {
         els = sel;
@@ -647,7 +819,8 @@ exports.domFadeToggle = function(sel, t) {
         els = [sel];
     }
     else {
-        els = Array.isArray(exports.domFind(sel)) ? els : [els];
+        els = exports.domFind(sel);
+        els = Array.isArray(els) ? els : [els];
     }
     if (Array.isArray(els)) {
         var len = els.length;
@@ -674,6 +847,9 @@ exports.domFadeToggle = function(sel, t) {
     }
 };
 exports.domOn = function(sel, k, fn) {
+    if (!sel) {
+        throw new Error('invalidParameter');
+    }
     if (!k || typeof(k) !== 'string' || typeof(fn) !== 'function') {
         return new Error('invalidParameter');
     }
@@ -685,7 +861,8 @@ exports.domOn = function(sel, k, fn) {
         els = [sel];
     }
     else {
-        els = Array.isArray(exports.domFind(sel)) ? els : [els];
+        els = exports.domFind(sel);
+        els = Array.isArray(els) ? els : [els];
     }
     if (Array.isArray(els)) {
         var len = els.length;
@@ -708,6 +885,9 @@ exports.domOn = function(sel, k, fn) {
     }
 };
 exports.domOff = function(sel, k) { // https://stackoverflow.com/a/4386514
+    if (!sel) {
+        throw new Error('invalidParameter');
+    }
     if (k && typeof(k) !== 'string') {
         throw new Error('invalidParameter');
     }
@@ -719,7 +899,8 @@ exports.domOff = function(sel, k) { // https://stackoverflow.com/a/4386514
         els = [sel];
     }
     else {
-        els = Array.isArray(exports.domFind(sel)) ? els : [els];
+        els = exports.domFind(sel);
+        els = Array.isArray(els) ? els : [els];
     }
     if (Array.isArray(els)) {
         var len = els.length;
@@ -749,6 +930,9 @@ exports.domOff = function(sel, k) { // https://stackoverflow.com/a/4386514
     }
 };
 exports.domTriggerNativeEvent = function(sel, k) {
+    if (!sel) {
+        throw new Error('invalidParameter');
+    }
     if (!k || typeof(k) !== 'string') {
         throw new Error('invalidParameter');
     }
@@ -760,7 +944,8 @@ exports.domTriggerNativeEvent = function(sel, k) {
         els = [sel];
     }
     else {
-        els = Array.isArray(exports.domFind(sel)) ? els : [els];
+        els = exports.domFind(sel);
+        els = Array.isArray(els) ? els : [els];
     }
     if (Array.isArray(els)) {
         var len = els.length;
@@ -778,6 +963,9 @@ exports.domTriggerNativeEvent = function(sel, k) {
     }
 };
 exports.domTriggerEvent = function(sel, k, v) {
+    if (!sel) {
+        throw new Error('invalidParameter');
+    }
     if (!k || typeof(k) !== 'string') {
         throw new Error('invalidParameter');
     }
@@ -789,7 +977,8 @@ exports.domTriggerEvent = function(sel, k, v) {
         els = [sel];
     }
     else {
-        els = Array.isArray(exports.domFind(sel)) ? els : [els];
+        els = exports.domFind(sel);
+        els = Array.isArray(els) ? els : [els];
     }
     if (Array.isArray(els)) {
         var len = els.length;
@@ -814,6 +1003,9 @@ exports.domTriggerEvent = function(sel, k, v) {
     }
 };
 exports.domAppend = function(sel, v) {
+    if (!sel) {
+        throw new Error('invalidParameter');
+    }
     if (typeof(v) !== 'string') {
         throw new Error('invalidParameter');
     }
@@ -825,7 +1017,8 @@ exports.domAppend = function(sel, v) {
         els = [sel];
     }
     else {
-        els = Array.isArray(exports.domFind(sel)) ? els : [els];
+        els = exports.domFind(sel);
+        els = Array.isArray(els) ? els : [els];
     }
     if (Array.isArray(els)) {
         for (var i = 0; i < els.length; i++) {
@@ -840,6 +1033,9 @@ exports.domAppend = function(sel, v) {
     }
 };
 exports.domPrepend = function(sel, v) {
+    if (!sel) {
+        throw new Error('invalidParameter');
+    }
     if (typeof(v) !== 'string') {
         throw new Error('invalidParameter');
     }
@@ -851,7 +1047,8 @@ exports.domPrepend = function(sel, v) {
         els = [sel];
     }
     else {
-        els = Array.isArray(exports.domFind(sel)) ? els : [els];
+        els = exports.domFind(sel);
+        els = Array.isArray(els) ? els : [els];
     }
     if (Array.isArray(els)) {
         for (var i = 0; i < els.length; i++) {
@@ -866,6 +1063,9 @@ exports.domPrepend = function(sel, v) {
     }
 };
 exports.domRemove = function(sel) {
+    if (!sel) {
+        throw new Error('invalidParameter');
+    }
     var els = null;
     if (Array.isArray(sel)) {
         els = sel;
@@ -874,7 +1074,8 @@ exports.domRemove = function(sel) {
         els = [sel];
     }
     else {
-        els = Array.isArray(exports.domFind(sel)) ? els : [els];
+        els = exports.domFind(sel);
+        els = Array.isArray(els) ? els : [els];
     }
     if (Array.isArray(els)) {
         for (var i = 0; i < els.length; i++) {

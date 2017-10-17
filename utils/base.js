@@ -1,6 +1,6 @@
 exports.moduleName = 'DefaultModule';
 exports.version = '1.0.0';
-exports.utilsVersion = '1.0.0';
+exports.utilsVersion = '1.0.1';
 exports.lan = {
     SK: 'SK',
     CZ: 'CZ',
@@ -51,11 +51,11 @@ exports.forEach = function(arr, fn) {
     }
 };
 exports.map = function(arr, fn) {
-    var arr = [];
-    for (var i = 0; i < this.length; i++) {
-        arr.push(fn(arr[i], i, arr));
+    var acc = [];
+    for (var i = 0; i < arr.length; i++) {
+        acc.push(fn(arr[i], i, arr));
     }
-    return arr;
+    return acc;
 };
 exports.filter = function(arr, fn) {
     var acc = [];
@@ -531,7 +531,7 @@ exports.Schema = function(fn) {
             this.rule[this.__control].message = {};
         }
         this.rule[this.__control].message[lan] = mes;
-    }
+    };
     function attrValidate(fn) {
         if (!fn || typeof(fn) !== 'function') {
             throw new Error('invalidParameter');
@@ -562,4 +562,13 @@ exports.Schema = function(fn) {
         }
     }
     return new Co(fn);
+};
+exports.keyCodeToKey = function(e) {
+    var map = {
+        16: 'shift', 17: 'ctrl', 18: 'alt', 65: 'a', 66: 'b', 67: 'c', 68: 'd',
+        69: 'e', 70: 'f', 71: 'g', 72: 'h', 73: 'i', 74: 'j', 75: 'k', 76: 'l',
+        77: 'm', 78: 'n', 79: 'o', 80: 'p', 81: 'q', 82: 'r', 83: 's', 84: 't',
+        85: 'u', 86: 'v', 87: 'w', 88: 'x', 89: 'y', 90: 'z'
+    };
+    return map[e.keyCode] || null;
 };

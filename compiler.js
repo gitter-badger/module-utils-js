@@ -8,7 +8,7 @@ exports.compileUtils = function(filePaths, accessVariable, moduleName) {
 	filePaths.forEach(function(path) {
 		str += compileUtilsFromFile(path, accessVariable, moduleName);
 	});
-	str += '}\n';
+	str += '};\n';
 	fs.writeFileSync('./utils.min.js', str);
 };
 function compileUtilsFromFile(filePath, accessVariable, moduleName) {
