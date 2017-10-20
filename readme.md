@@ -1,4 +1,4 @@
-# utils-js
+# module-utils-js
 *Alpha version - compiler works, utils are unfinished.*
 
 Storage for custom javascript utility functions (utils).
@@ -8,7 +8,7 @@ Project contains compiler which generates following output:
 var U = {
     name: 'DefaultModule',
     version: '1.0.0',
-    utilsVersion: '1.0.0',
+    utilsVersion: '1.0.1',
     yourUtilityFunction1: // (function|object|date)
     // More utilities...
 }
@@ -17,7 +17,7 @@ var U = {
 ## Recommendations
 Keep utils structure flat. Compiler allows to add utils under nested objects
 but toplevel object will be compiled always as `oneliner` which makes finding utils harder.
-So avoid making objects to wrap your utils.
+For this reason try to avoid creating objects to wrap your utils. On the other hand object support is usefull to hold internal state of group of utilities i.e. dom event handler functions are stored this way, see `utils/dom.js`.
 
 ## Benefits
 - Great for developing standalone module or library with no need to start always from scratch.
@@ -32,9 +32,12 @@ So avoid making objects to wrap your utils.
 - You must keep utils structure flat.
 
 ## Compile command
+```
+    node compile
+```
 ENV variables:
-- `MODULE` - **PascalCase** name of your module.
-To compile utilities run:
+- `MODULE` - **PascalCase** `U.name` of module.
+
 ```
     MODULE="ContentEditor" node compile
 ```
