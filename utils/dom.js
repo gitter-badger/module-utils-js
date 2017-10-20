@@ -12,6 +12,13 @@ exports.domReady = function(fn) {
 exports.isDomEl = function(el) {
     return (el instanceof Element || el instanceof HTMLDocument);
 };
+exports.domMatches = function(el, sel) { // https://developer.mozilla.org/en-US/docs/Web/API/Element/matches
+	var p = Element.prototype;
+	var f = p.matches || p.webkitMatchesSelector || p.mozMatchesSelector || p.msMatchesSelector || function(s) {
+		return (Array.prototype.indexOf.call(document.querySelectorAll(s), this) !== -1);
+	};
+	return f.call(el, sel);
+};
 /**
  * @param {String} sel
  * @param {Element} el
@@ -347,7 +354,7 @@ exports.domData = function(sel, k, v) {
     }
     return selectingOne(sel) ? arr[0] : arr;
     function getData(el, k) {
-        if (el.__elementData[k]) {
+        if (el.__elementData && el.__elementData[k]) {
             return el.__elementData[k];
         }
         return el.dataset[k] || null;
@@ -641,8 +648,79 @@ exports.domPrev = function(sel) {
         }
     }
     return selectingOne(sel) ? arr[0] : arr;
-    function getPrev(el) {
-        return el.previousElementSibling || null;
+    function getPrev(el, psel) {
+        var els = (el.parentNode && el.parentNode.children) ? el.parentNode.children : [];
+        var arr = [];
+        var brk = false;
+        for (var i = els.length - 1; i >= 0; i--) {
+            var sib = els[i];
+            if (sib === el) {
+                brk = true;
+                continue;
+            }
+            if (brk && sib && (exports.domMatches(sib, psel) || !psel)) {
+                return sib;
+            }
+            else {
+                continue;
+            }
+        }
+        return null;
+    }
+    function selectingOne(sel) {
+        if (U.isDomEl(sel)) {
+            return true;
+        }
+        else if (typeof(sel) === 'string') {
+            var parts = sel.split(/\s+/);
+            return (parts && parts.length == 1 && parts[0][0] == '#');
+        }
+        return false;
+    }
+};
+exports.domNext = function(sel, nsel) {
+    if (!sel) {
+        throw new Error('invalidParameter');
+    }
+    var els = null;
+    if (Array.isArray(sel)) {
+        els = sel;
+    }
+    else if (exports.isDomEl(sel)) {
+        els = [sel];
+    }
+    else {
+        els = exports.domFind(sel);
+        els = Array.isArray(els) ? els : [els];
+    }
+    var arr = [];
+    if (Array.isArray(els)) {
+        for (var i = 0; i < els.length; i++) {
+            var el = els[i];
+            if (el) {
+                arr.push(getNext(el, nsel));
+            }
+        }
+    }
+    return selectingOne(sel) ? arr[0] : arr;
+    function getNext(el, nsel) {
+        var els = (el.parentNode && el.parentNode.children) ? el.parentNode.children : [];
+        var arr = [];
+        var brk = false;
+        for (var i = 0; i < els.length; i++) {
+            var sib = els[i];
+            if (sib === el) {
+                brk = true;
+                continue;
+            }
+            if (brk && sib && (exports.domMatches(sib, nsel) || !nsel)) {
+                return sib;
+            }
+            else {
+                continue;
+            }
+        }
+        return null;
     }
     function selectingOne(sel) {
         if (U.isDomEl(sel)) {
