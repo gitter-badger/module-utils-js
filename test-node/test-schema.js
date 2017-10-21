@@ -1,16 +1,31 @@
 var U = require('../utils/base');
 
-var SchemaOne = U.Schema(function(attr, attrError, attrValidate, func, funcError) {
-    attr('name', String, true);
+var SchemaOne = U.Schema(function(attr, attrError, attrPrepare, attrValidate, func, funcError) {
+    attr('name', String);
+    attrValidate(function(v, typeMatch) {
+        return typeMatch && !!v;
+    });
     attrError('Parameter "name" is missing or has incorrect format.');
     attrError(U.lan.SK, 'Paremeter "name" chýba alebo má nesprávny formát.');
     attrError(U.lan.CZ, 'Parametr "name" chybí nebo má špatný formát.');
-    attr('surname', String, false);
+    attr('surname', String); // If you want to apply prepare and validate function, last parameter must be true.
     attrError('Parameter "surname" has incorrect format.');
-    attr('projects', Array, true);
+    attrPrepare(function(v) {
+        return v || null; // When we prepare with bad type, validation will contain error.
+    });
+    attrValidate(function(v, typeMatch, actualType, ruleType) {
+        if (v === null) {
+            return true;
+        }
+        return typeMatch;
+    });
+    attr('projects', Array);
     attrError('Parameter "projects" has to be array of at least one item.');
-    attrValidate(function(arr) {
-        return arr.length > 0;
+    attrValidate(function(arr, typeMatch, actualType, ruleType) {
+        if (!arr) {
+            return false;
+        }
+        return typeMatch && arr.length > 0;
     });
     func('getName');
     funcError('Function "getName" is missing.');
@@ -18,15 +33,15 @@ var SchemaOne = U.Schema(function(attr, attrError, attrValidate, func, funcError
 });
 var obj = {
     name: 'Tomas',
+    // surname: undefined,
     projects: ['TodoList'],
     // getName: function() {}
 };
-var errors = SchemaOne.validate(obj);
-console.log('errors default locale: ', errors);
-var errors = SchemaOne.validate(obj, U.lan.SK);
-console.log('errors default sk locale: ', errors);
+var errors = SchemaOne.prepareAndValidate(obj, U.lan.SK);
+U.log('errors default sk locale: ', errors);
 if (errors.hasError()) {
     // errors.throwFirst();
 }
+U.log('before normalize: ', obj);
 var norm = SchemaOne.normalize(obj);
-console.log('normalized: ', norm);
+U.log('normalized: ', norm);

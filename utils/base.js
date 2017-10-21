@@ -1,6 +1,6 @@
 exports.moduleName = 'DefaultModule';
 exports.version = '1.0.0';
-exports.utilsVersion = '1.0.1';
+exports.utilsVersion = '1.0.2';
 exports.lan = {
     SK: 'SK',
     CZ: 'CZ',
@@ -127,10 +127,10 @@ exports.clone = function(obj, skip, skipFunctions) {
 };
 exports.contains = function(arrOrStr, v) {
     if (!arrOrStr) {
-        throw new Error('invalidParameter');
+        return false;
     }
     if (typeof(arrOrStr) !== 'string' && !Array.isArray(arrOrStr)) {
-        throw new Error('invalidParameter');
+        return false;
     }
     return (arrOrStr.indexOf(v) !== -1);
 };
@@ -412,35 +412,27 @@ exports.Schema = function(fn) {
         fn.apply(null, [
             attr.bind(this),
             attrError.bind(this),
+            attrPrepare.bind(this),
             attrValidate.bind(this),
             func.bind(this),
             funcError.bind(this)
         ]);
     };
     Co.prototype = {
-        validate: function(obj, lan) { // Can be called without normalize.
+        prepareAndValidate: function(obj, lan) { // Can be called without normalize.
             var eb = new exports.ErrorBuilder();
             for (var k in this.rule) {
                 if (this.rule.hasOwnProperty(k)) {
                     var v = obj[k];
                     var rule = this.rule[k];
                     var mes = rule.message[lan] || rule.message['default'] || ('Invalid property "' + k + '".');
-                    if (rule.required) {
-                        if (rule.type === '[object Number]') {
-                            if (!v && v !== 0) {
-                                eb.push(exports.error(k, mes));
-                            }
-                        }
-                        else {
-                            if (!v) {
-                                eb.push(exports.error(k, mes));
-                            }
-                        }
+                    if (rule.prepare) {
+                        v = rule.prepare(v);
+                        obj[k] = v;
                     }
-                    if (v && Object.prototype.toString.call(v) !== rule.type) {
-                        eb.push(exports.error(k, mes));
-                    }
-                    if (v && rule.validate && !rule.validate(v)) {
+                    var act = Object.prototype.toString.call(v);
+                    var mat = (act === rule.type);
+                    if (rule.validate && !rule.validate(v, mat, act, rule.type)) {
                         eb.push(exports.error(k, mes));
                     }
                 }
@@ -482,18 +474,17 @@ exports.Schema = function(fn) {
             return norm;
         }
     };
-    function attr(name, type, required) { // Starts attribute definition
+    function attr(name, type) { // Starts attribute definition
         if (!name || typeof(name) !== 'string') {
             throw new Error('invalidParameter');
         }
         type = strType(type);
-        if (!type || typeof(required) !== 'boolean') {
+        if (!type) {
             throw new Error('invalidParameter');
         }
         this.__control = name;
         this.rule[this.__control] = {
             type: type,
-            required: required,
             message: {
                 default: 'Invalid attribute "' + name + '".'
             }
@@ -506,7 +497,6 @@ exports.Schema = function(fn) {
         this.__control = name;
         this.rule[this.__control] = {
             type: '[object Function]',
-            required: true,
             message: {
                 default: 'Invalid function "' + name + '".'
             }
@@ -529,6 +519,15 @@ exports.Schema = function(fn) {
         }
         this.rule[this.__control].message[lan] = mes;
     };
+    function attrPrepare(fn) {
+        if (!fn || typeof(fn) !== 'function') {
+            throw new Error('invalidParameter');
+        }
+        if (!this.rule[this.__control]) {
+            throw new Error('invalidOrder');
+        }
+        this.rule[this.__control].prepare = fn;
+    }
     function attrValidate(fn) {
         if (!fn || typeof(fn) !== 'function') {
             throw new Error('invalidParameter');
