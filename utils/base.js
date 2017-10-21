@@ -1,6 +1,6 @@
 exports.moduleName = 'DefaultModule';
 exports.version = '1.0.0';
-exports.utilsVersion = '1.0.2';
+exports.utilsVersion = '1.0.3';
 exports.lan = {
     SK: 'SK',
     CZ: 'CZ',
@@ -427,7 +427,7 @@ exports.Schema = function(fn) {
                     var rule = this.rule[k];
                     var mes = rule.message[lan] || rule.message['default'] || ('Invalid property "' + k + '".');
                     if (rule.prepare) {
-                        v = rule.prepare(v);
+                        v = rule.prepare(v, obj);
                         obj[k] = v;
                     }
                     var act = Object.prototype.toString.call(v);
