@@ -1,6 +1,6 @@
 exports.moduleName = 'DefaultModule';
 exports.version = '1.0.0';
-exports.utilsVersion = '1.0.3';
+exports.utilsVersion = '1.0.5';
 exports.lan = {
     SK: 'SK',
     CZ: 'CZ',
@@ -290,6 +290,12 @@ exports.strHtml = function(tag, obj) {
         }
         return (str.length > 0) ? (' style="' + str + '"') : '';
     }
+}
+exports.strStripHTML = function(str) {
+    return (typeof(str) == 'string') ? str.replace(/<\/?[^>]+(>|$)/g, '') : '';
+};
+exports.strStripWhitespaces = function(str) {
+    return (typeof str == 'string') ? str.replace(/\s+/, '') : '';
 };
 exports.logDebug = function(/*...args*/) {
 	var log = exports.argsToDebugString.apply(this, arguments);
@@ -432,7 +438,7 @@ exports.Schema = function(fn) {
                     }
                     var act = Object.prototype.toString.call(v);
                     var mat = (act === rule.type);
-                    if (rule.validate && !rule.validate(v, mat, act, rule.type)) {
+                    if (rule.validate && !rule.validate(v, mat, obj, act, rule.type)) {
                         eb.push(exports.error(k, mes));
                     }
                 }
@@ -559,14 +565,14 @@ exports.Schema = function(fn) {
     }
     return new Co(fn);
 };
-exports.keyCodeToKey = function(e) {
+exports.keyCodeToKey = function(keyCode) {
     var map = {
-        16: 'shift', 17: 'ctrl', 18: 'alt', 65: 'a', 66: 'b', 67: 'c', 68: 'd',
-        69: 'e', 70: 'f', 71: 'g', 72: 'h', 73: 'i', 74: 'j', 75: 'k', 76: 'l',
-        77: 'm', 78: 'n', 79: 'o', 80: 'p', 81: 'q', 82: 'r', 83: 's', 84: 't',
-        85: 'u', 86: 'v', 87: 'w', 88: 'x', 89: 'y', 90: 'z'
+        13: 'ENTER', 16: 'SHIFT', 17: 'CTRL', 18: 'ALT', 65: 'A', 66: 'B',
+        67: 'C', 68: 'D', 69: 'E', 70: 'F', 71: 'G', 72: 'H', 73: 'I', 74: 'J',
+        75: 'K', 76: 'L', 77: 'M', 78: 'N', 79: 'O', 80: 'P', 81: 'Q', 82: 'R',
+        83: 'S', 84: 'T', 85: 'U', 86: 'V', 87: 'W', 88: 'X', 89: 'Y', 90: 'Z'
     };
-    return map[e.keyCode] || null;
+    return map[keyCode] || null;
 };
 exports.strRemoveDiacritics = function(str) {
     var map = {
@@ -1445,4 +1451,106 @@ exports.strSlug = function(str, max) {
     }
     var l = builder.length - 1;
     return builder[l] === '-' ? builder.substring(0, l) : builder;
+};
+exports.arrRemove = function(arr, fn, v) { // FROM TOTAL.JS
+    var isFN = typeof(fn) === 'function';
+    var isV = v !== undefined;
+    var tmp = [];
+    for (var i = 0, length = arr.length; i < length; i++) {
+        if (isFN) {
+            !fn.call(arr, arr[i], i) && tmp.push(arr[i]);
+            continue;
+        }
+        if (isV) {
+            arr[i] && arr[i][fn] !== v && tmp.push(arr[i]);
+            continue;
+        }
+        arr[i] !== fn && tmp.push(arr[i]);
+    }
+    return tmp;
+};
+exports.arrOrderBy = function(arr, name, asc, maxlength) { // FROM TOTAL.JS EXCEPT JSON DATE COMPARISION
+    var length = arr.length;
+    if (!length || length === 1) {
+        return arr;
+    }
+    if (typeof(name) === 'boolean') {
+        asc = name;
+        name = undefined;
+    }
+    if (maxlength === undefined) {
+        maxlength = 3;
+    }
+    if (asc === undefined) {
+        asc = true;
+    }
+    var type = 0;
+    var field = name ? arr[0][name] : arr[0];
+    switch (typeof(field)) {
+        case 'string':
+            type = 1;
+            break;
+        case 'number':
+            type = 2;
+            break;
+        case 'boolean':
+            type = 3;
+            break;
+        default:
+            if (!field instanceof Date && !isNaN(field.getTime())) {
+                return arr;
+            }
+            type = 4;
+            break;
+    }
+    function _shellInsertionSort(list, length, gapSize, fn) {
+        var temp, i, j;
+        for (i = gapSize; i < length; i += gapSize ) {
+            j = i;
+            while(j > 0 && fn(list[j - gapSize], list[j]) === 1) {
+                temp = list[j];
+                list[j] = list[j - gapSize];
+                list[j - gapSize] = temp;
+                j -= gapSize;
+            }
+        }
+    };
+    function shellsort(arr, fn) {
+        var length = arr.length;
+        var gapSize = Math.floor(length / 2);
+        while(gapSize) {
+            _shellInsertionSort(arr, length, gapSize, fn);
+            gapSize = Math.floor(gapSize / 2);
+        }
+        return arr;
+    };
+    shellsort(arr, function(a, b) {
+        var va = name ? a[name] : a;
+        var vb = name ? b[name] : b;
+        if (type === 1) {
+            return (va && vb) ? (asc ? exports.strRemoveDiacritics(va.substring(0, maxlength)).localeCompare(exports.strRemoveDiacritics(vb.substring(0, maxlength))) : exports.strRemoveDiacritics(vb.substring(0, maxlength)).localeCompare(exports.strRemoveDiacritics(va.substring(0, maxlength)))) : 0;
+        }
+        else if (type === 2) {
+            return va > vb ? (asc ? 1 : -1) : va < vb ? (asc ? -1 : 1) : 0;
+        }
+        else if (type === 3) {
+            return va === true && vb === false ? (asc ? 1 : -1) : va === false && vb === true ? (asc ? -1 : 1) : 0;
+        }
+        else if (type === 4) {
+            if (!va || !vb) {
+                return 0;
+            }
+            if (!va.getTime) {
+                va = new Date(va);
+            }
+            if (!vb.getTime) {
+                vb = new Date(vb);
+            }
+            var at = va.getTime();
+            var bt = vb.getTime();
+            return at > bt ? (asc ? 1 : -1) : at < bt ? (asc ? -1 : 1) : 0;
+        }
+        return 0;
+    });
+    return arr;
 };

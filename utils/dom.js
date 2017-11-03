@@ -10,7 +10,7 @@ exports.domReady = function(fn) {
     }
 };
 exports.isDomEl = function(el) {
-    return (el instanceof Element || el instanceof HTMLDocument);
+    return (el instanceof Node || el instanceof Element || el instanceof HTMLDocument);
 };
 exports.domMatches = function(el, sel) { // https://developer.mozilla.org/en-US/docs/Web/API/Element/matches
 	var p = Element.prototype;

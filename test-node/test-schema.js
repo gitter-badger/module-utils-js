@@ -13,7 +13,7 @@ var SchemaOne = U.Schema(function(attr, attrError, attrPrepare, attrValidate, fu
     attrPrepare(function(v) {
         return v || null; // When we prepare with bad type, validation will contain error.
     });
-    attrValidate(function(v, typeMatch, actualType, ruleType) {
+    attrValidate(function(v, typeMatch, obj, actualType, ruleType) {
         if (v === null) {
             return true;
         }
@@ -21,7 +21,7 @@ var SchemaOne = U.Schema(function(attr, attrError, attrPrepare, attrValidate, fu
     });
     attr('projects', Array);
     attrError('Parameter "projects" has to be array of at least one item.');
-    attrValidate(function(arr, typeMatch, actualType, ruleType) {
+    attrValidate(function(arr, typeMatch, obj, actualType, ruleType) {
         if (!arr) {
             return false;
         }
