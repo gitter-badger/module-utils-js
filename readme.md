@@ -8,22 +8,24 @@ Project contains compiler which generates following output:
 var U = {
     name: 'DefaultModule',
     version: '1.0.0',
-    utilsVersion: '1.0.1',
+    utilsVersion: '1.0.6',
     yourUtilityFunction1: // (function|object|date)
     // More utilities...
 }
 ```
 
+Compiler writes output to: `utils.min.js`.
+
 ## Recommendations
 Keep utils structure flat. Compiler allows to add utils under nested objects
 but toplevel object will be compiled always as `oneliner` which makes finding utils harder.
-For this reason try to avoid creating objects to wrap your utils. On the other hand object support is usefull to hold internal state of group of utilities i.e. dom event handler functions are stored this way, see `utils/dom.js`.
+For this reason try to avoid creating objects to wrap your utils. On the other hand object support is useful to hold internal state of group of utilities i.e. dom event handler functions are stored this way, see `utils/dom.js`.
 
 ## Benefits
 - Great for developing standalone module or library with no need to start always from scratch.
 - Simply copy&paste utils to or between modules.
 - Track `module version` and `utils version` separately.
-- Contains some usefull utilities out of a box.
+- Contains some useful utilities out of a box.
 - Easy to accommodate, just remove files from utils and create your custom utils.
 - Brutal fast compilation.
 
@@ -37,7 +39,8 @@ For this reason try to avoid creating objects to wrap your utils. On the other h
 ```
 ENV variables:
 - `MODULE` - **PascalCase** `U.name` of module.
+- `KEYS` - list of comma separated keys, useful when generating light version of utils.
 
 ```
-    MODULE="ContentEditor" node compile
+    MODULE=ContentEditor KEYS=moduleName,objectKeys,find,extend,ajax node compile
 ```

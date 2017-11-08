@@ -1,24 +1,48 @@
 var fs = require('fs');
 var base = require('./utils/base.js');
-exports.compileUtils = function(filePaths, accessVariable, moduleName) {
+exports.compileUtils = function(filePaths, accessVariable, moduleName, keys) {
 	if (!Array.isArray(filePaths) || filePaths.length == 0) {
 		return;
-	}
-	str = 'var ' + accessVariable + ' = {\n';
-	filePaths.forEach(function(path) {
-		str += compileUtilsFromFile(path, accessVariable, moduleName);
+    }
+    fileStats = getFileStatsWithAtLeastOneKey(filePaths, keys);
+    str = 'var ' + accessVariable + ' = {\n';
+	fileStats.forEach(function(fileStat, fileIndex) {
+        var lastFile = (fileStats.length === fileIndex + 1);
+		str += compileUtilsFromFile(fileStat.filePath, fileStat.keyCount, accessVariable, moduleName, lastFile, keys);
 	});
 	str += '};\n';
 	fs.writeFileSync('./utils.min.js', str);
 };
-function compileUtilsFromFile(filePath, accessVariable, moduleName) {
+function getFileStatsWithAtLeastOneKey(filePaths, keys) {
+    var arr = [];
+    filePaths.forEach(function(path) {
+        var utils = require(path);
+        var len = Array.isArray(keys) ? Object.keys(utils).filter(function(k) {
+            return (keys.indexOf(k) >= 0);
+        }).length : Object.keys(utils).length;
+        if (len > 0) {
+            arr.push({
+                filePath: path,
+                keyCount: len
+            });
+        }
+    });
+    return arr;
+}
+function compileUtilsFromFile(filePath, keyCount, accessVariable, moduleName, lastFile, keys) {
 	var temp = '';
-	var utils = require(filePath);
+    var utils = require(filePath);
+    var i = 1;
 	for (var k in utils) {
-		if (utils.hasOwnProperty(k)) {
-			var v = utils[k];
-			temp += '    ' + k + ': ' + compileModuleValue(k, v, accessVariable, moduleName) + ',\n';
-		}
+		if (!utils.hasOwnProperty(k)) {
+            continue;
+        }
+        if (Array.isArray(keys) && keys.indexOf(k) < 0) {
+            continue;
+        }
+        var v = utils[k];
+        temp += '    ' + k + ': ' + compileModuleValue(k, v, accessVariable, moduleName) + ((i === keyCount && lastFile) ? '\n ' : ',\n');
+        i++;
 	}
 	return temp;
 }
