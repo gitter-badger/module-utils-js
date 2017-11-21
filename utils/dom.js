@@ -678,6 +678,53 @@ exports.domPrev = function(sel) {
         return false;
     }
 };
+exports.domPrevAll = function(sel) {
+    if (!sel) {
+        throw new Error('invalidParameter');
+    }
+    var els = null;
+    if (Array.isArray(sel)) {
+        els = sel;
+    }
+    else if (exports.isDomEl(sel)) {
+        els = [sel];
+    }
+    else {
+        els = exports.domFind(sel);
+        els = Array.isArray(els) ? els : [els];
+    }
+    var arr = [];
+    if (Array.isArray(els)) {
+        for (var i = 0; i < els.length; i++) {
+            var el = els[i];
+            if (el) {
+                arr.push(getPrevAll(el));
+            }
+        }
+    }
+    return selectingOne(sel) ? arr[0] : arr;
+    function getPrevAll(el) {
+        var els = (el.parentNode && el.parentNode.children) ? el.parentNode.children : [];
+        var arr = [];
+        for (var i = 0; i < els.length; i++) {
+            var ch = els[i];
+            if (ch === el) {
+                return arr;
+            }
+            arr.push(ch);
+        }
+    }
+    function selectingOne(sel) {
+        if (U.isDomEl(sel)) {
+            return true;
+        }
+        else if (typeof(sel) === 'string') {
+            var parts = sel.split(/\s+/);
+            return (parts && parts.length == 1 && parts[0][0] == '#');
+        }
+        return false;
+    }
+};
 exports.domNext = function(sel, nsel) {
     if (!sel) {
         throw new Error('invalidParameter');
@@ -721,6 +768,57 @@ exports.domNext = function(sel, nsel) {
             }
         }
         return null;
+    }
+    function selectingOne(sel) {
+        if (U.isDomEl(sel)) {
+            return true;
+        }
+        else if (typeof(sel) === 'string') {
+            var parts = sel.split(/\s+/);
+            return (parts && parts.length == 1 && parts[0][0] == '#');
+        }
+        return false;
+    }
+};
+exports.domNextAll = function(sel) {
+    if (!sel) {
+        throw new Error('invalidParameter');
+    }
+    var els = null;
+    if (Array.isArray(sel)) {
+        els = sel;
+    }
+    else if (exports.isDomEl(sel)) {
+        els = [sel];
+    }
+    else {
+        els = exports.domFind(sel);
+        els = Array.isArray(els) ? els : [els];
+    }
+    var arr = [];
+    if (Array.isArray(els)) {
+        for (var i = 0; i < els.length; i++) {
+            var el = els[i];
+            if (el) {
+                arr.push(getNextAll(el));
+            }
+        }
+    }
+    return selectingOne(sel) ? arr[0] : arr;
+    function getNextAll(el) {
+        var els = (el.parentNode && el.parentNode.children) ? el.parentNode.children : [];
+        var arr = [];
+        var brk = false;
+        for (var i = 0; i < els.length; i++) {
+            var ch = els[i];
+            if (brk) {
+                arr.push(ch);
+            }
+            if (ch === el) {
+                brk = true;
+            }
+        }
+        return arr;
     }
     function selectingOne(sel) {
         if (U.isDomEl(sel)) {

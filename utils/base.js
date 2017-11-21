@@ -1,6 +1,6 @@
 exports.moduleName = 'DefaultModule';
 exports.version = '1.0.0';
-exports.utilsVersion = '1.0.6';
+exports.utilsVersion = '1.0.7';
 exports.lan = {
     SK: 'SK',
     CZ: 'CZ',
@@ -292,7 +292,29 @@ exports.strHtml = function(tag, obj) {
     }
 }
 exports.strStripHTML = function(str) {
-    return (typeof(str) == 'string') ? str.replace(/<\/?[^>]+(>|$)/g, '') : '';
+    str = (typeof(str) == 'string') ? str.replace(/<\/?[^>]+(>|$)/g, '') : '';
+    var map = {
+        'nbsp': ' ',
+        'amp': '&',
+        'quot': '\"',
+        'lt': '<',
+        'gt': '>'
+    };
+    return str.replace(/&(nbsp|amp|quot|lt|gt);/g, function(match, k) {
+        return map[k] || k;
+    });
+};
+exports.strToHTMLText = function(str) {
+    var map = {
+        ' ': 'nbsp',
+        '&': 'amp',
+        '\"': 'quot',
+        '<': 'lt',
+        '>': 'gt'
+    };
+    return str.replace(/(\s|&|"|<|>)/g, function(match, k) {
+        return ('&' + map[k] + ';') || k;
+    });
 };
 exports.strStripWhitespaces = function(str) {
     return (typeof str == 'string') ? str.replace(/\s+/, '') : '';
@@ -303,12 +325,12 @@ exports.logDebug = function(/*...args*/) {
 };
 exports.log = function(/*...args*/) {
     var args = [].slice.call(arguments);
-    args.unshift(exports.moduleName + ': ');
+    args.unshift(exports.moduleName + ':');
     console.log.apply(null, args);
 };
 exports.logWarn = function(/*...args*/) {
     var args = [].slice.call(arguments);
-    args.unshift(exports.moduleName + ': ');
+    args.unshift(exports.moduleName + ':');
     console.warn.apply(null, args);
 };
 /**
@@ -338,6 +360,13 @@ exports.error = function(problem, message) {
     Co.prototype = {
         throw: function() {
             throw new Error(this.id);
+        },
+        log: function() {
+            exports.logWarn(this.id + ': ' + this.message);
+        },
+        logAndThrow: function() {
+            this.log();
+            this.throw();
         },
         toString: function() {
             return JSON.stringify({
@@ -407,6 +436,16 @@ exports.ErrorBuilder = function(errors) {
         },
         toString: function() {
             return JSON.stringify(this, null, '    ');
+        },
+        logFirst: function() {
+            if (this.errors[0]) {
+                this.errors[0].log();
+            }
+        },
+        logAndThrowFirst: function() {
+            if (this.errors[0]) {
+                this.errors[0].logAndThrow();
+            }
         }
     };
     return new Co(errors);
@@ -414,6 +453,7 @@ exports.ErrorBuilder = function(errors) {
 exports.Schema = function(fn) {
     var Co = function(fn) {
         this.rule = {};
+        this.prefix = '';
         this.__control = null;
         fn.apply(null, [
             attr.bind(this),
@@ -421,11 +461,15 @@ exports.Schema = function(fn) {
             attrPrepare.bind(this),
             attrValidate.bind(this),
             func.bind(this),
-            funcError.bind(this)
+            funcError.bind(this),
+            setPrefix.bind(this)
         ]);
     };
     Co.prototype = {
         prepareAndValidate: function(obj, lan) { // Can be called without normalize.
+            if (typeof(obj) !== 'object' || !obj) {
+                throw new Error('invalidParameter');
+            }
             var eb = new exports.ErrorBuilder();
             for (var k in this.rule) {
                 if (this.rule.hasOwnProperty(k)) {
@@ -439,7 +483,7 @@ exports.Schema = function(fn) {
                     var act = Object.prototype.toString.call(v);
                     var mat = (act === rule.type);
                     if (rule.validate && !rule.validate(v, mat, obj, act, rule.type)) {
-                        eb.push(exports.error(k, mes));
+                        eb.push(exports.error(this.prefix + k, mes));
                     }
                 }
             }
@@ -559,18 +603,57 @@ exports.Schema = function(fn) {
         else if (type === Object) {
             return '[object Object]';
         }
+        else if (type === Boolean) {
+            return '[object Boolean]';
+        }
         else {
             null;
         }
+    }
+    function setPrefix(prefix) {
+        this.prefix = prefix;
     }
     return new Co(fn);
 };
 exports.keyCodeToKey = function(keyCode) {
     var map = {
-        13: 'ENTER', 16: 'SHIFT', 17: 'CTRL', 18: 'ALT', 65: 'A', 66: 'B',
-        67: 'C', 68: 'D', 69: 'E', 70: 'F', 71: 'G', 72: 'H', 73: 'I', 74: 'J',
-        75: 'K', 76: 'L', 77: 'M', 78: 'N', 79: 'O', 80: 'P', 81: 'Q', 82: 'R',
-        83: 'S', 84: 'T', 85: 'U', 86: 'V', 87: 'W', 88: 'X', 89: 'Y', 90: 'Z'
+        8: 'BACKSPACE',
+        9: 'TAB',
+        13: 'ENTER',
+        16: 'SHIFT',
+        17: 'CTRL',
+        18: 'ALT',
+        32: 'SPACE',
+        37: 'LEFT_ARROW',
+        38: 'UP_ARROW',
+        39: 'RIGHT_ARROW',
+        40: 'DOWN_ARROW',
+        65: 'A',
+        66: 'B',
+        67: 'C',
+        68: 'D',
+        69: 'E',
+        70: 'F',
+        71: 'G',
+        72: 'H',
+        73: 'I',
+        74: 'J',
+        75: 'K',
+        76: 'L',
+        77: 'M',
+        78: 'N',
+        79: 'O',
+        80: 'P',
+        81: 'Q',
+        82: 'R',
+        83: 'S',
+        84: 'T',
+        85: 'U',
+        86: 'V', 
+        87: 'W', 
+        88: 'X', 
+        89: 'Y', 
+        90: 'Z'
     };
     return map[keyCode] || null;
 };
