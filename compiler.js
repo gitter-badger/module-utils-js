@@ -41,7 +41,7 @@ function compileUtilsFromFile(filePath, keyCount, accessVariable, moduleName, la
             continue;
         }
         var v = utils[k];
-        temp += '    ' + k + ': ' + compileModuleValue(k, v, accessVariable, moduleName) + ((i === keyCount && lastFile) ? '\n ' : ',\n');
+        temp += '    ' + k + ': ' + compileModuleValue(k, v, accessVariable, moduleName) + ((i === keyCount && lastFile) ? '\n' : ',\n');
         i++;
 	}
 	return temp;
