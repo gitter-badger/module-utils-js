@@ -1,6 +1,6 @@
 exports.moduleName = 'DefaultModule';
 exports.version = '1.0.0';
-exports.utilsVersion = '1.0.7';
+exports.utilsVersion = '1.0.8';
 exports.lan = {
     SK: 'SK',
     CZ: 'CZ',
@@ -75,7 +75,7 @@ exports.find = function(arr, fn) {
     return null;
 };
 exports.reduce = function(arr, fn, initial, context){
-    var acc = (initial !== undefined && initial !== null) ? initial : arr[i++];
+    var acc = (initial === undefined) ? 0 : initial;
     for (var i = 0; i < arr.length; i++) {
         acc = fn.call(context, acc, arr[i], i, arr);
     }
@@ -306,15 +306,30 @@ exports.strStripHTML = function(str) {
 };
 exports.strToHTMLText = function(str) {
     var map = {
-        ' ': 'nbsp',
         '&': 'amp',
         '\"': 'quot',
         '<': 'lt',
         '>': 'gt'
     };
-    return str.replace(/(\s|&|"|<|>)/g, function(match, k) {
+    str = str.replace(/(&|"|<|>)/g, function(match, k) {
         return ('&' + map[k] + ';') || k;
     });
+    str = str.replace(/\S(\s+)\S/g, function(match, k) {
+        var len = k.split('').length;
+        var s = '';
+        for (var i = 0; i < len; i++) {
+            s += (i % 2 == 0) ? ' ' : '&nbsp;';
+        }
+        return s;
+    });
+    str = str.replace(/(^\s+|\s+$)/g, function(match, k) {
+        var s = '';
+        for (var i = 0; i < k.length; i++) {
+            s += '&nbsp;';
+        }
+        return s;
+    });
+    return str;
 };
 exports.strStripWhitespaces = function(str) {
     return (typeof str == 'string') ? str.replace(/\s+/, '') : '';
@@ -1535,6 +1550,23 @@ exports.strSlug = function(str, max) {
     var l = builder.length - 1;
     return builder[l] === '-' ? builder.substring(0, l) : builder;
 };
+exports.strUntil = function(str, splitRegex) {
+    var parts = str.split(splitRegex);
+    return (Array.isArray(parts) && parts[0]) ? parts[0] : '';
+};
+exports.strReverse = function(str) {
+    var rev = '';
+    for (var i = str.length - 1; i >= 0; i--) {
+        rev += str[i];
+    }
+    return rev;
+};
+exports.regexMatchLength = function(str, regex, i) {
+    var matches = str.match(regex);
+    i = parseInt(i);
+    i = isNaN(i) ? 0 : i;
+    return (Array.isArray(matches) && matches[i]) ? matches[i].length : 0;
+};
 exports.arrRemove = function(arr, fn, v) { // FROM TOTAL.JS
     var isFN = typeof(fn) === 'function';
     var isV = v !== undefined;
@@ -1551,6 +1583,12 @@ exports.arrRemove = function(arr, fn, v) { // FROM TOTAL.JS
         arr[i] !== fn && tmp.push(arr[i]);
     }
     return tmp;
+};
+exports.arrFirst = function(arr) {
+    return arr[0] || null;
+};
+exports.arrLast = function(arr) {
+    return arr[arr.length - 1] || null;
 };
 exports.arrOrderBy = function(arr, name, asc, maxlength) { // FROM TOTAL.JS EXCEPT JSON DATE COMPARISION
     var length = arr.length;
