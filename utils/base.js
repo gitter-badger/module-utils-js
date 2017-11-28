@@ -304,7 +304,7 @@ exports.strStripHTML = function(str) {
         return map[k] || k;
     });
 };
-exports.strToHTMLText = function(str) {
+exports.strToHTMLText = function(str, revStart, revEnd){
     var map = {
         '&': 'amp',
         '\"': 'quot',
@@ -324,22 +324,22 @@ exports.strToHTMLText = function(str) {
     });
     str = str.replace(/^\s+/, function(spaces) {
         var len = spaces.split('').length;
-        var s = '';
+        var arr = [];
         for (var i = 0; i < len; i++) {
-            s += (i % 2 == 0) ? '&nbsp;' : ' ';
+            arr[i] = (i % 2 == 0) ? (revStart ? ' ' : '&nbsp;') : (revStart ? '&nbsp;' : ' ');
         }
-        return s;
+        return revStart ? arr.reverse().join('') : arr.join('');
     });
     str = str.replace(/\s+$/, function(spaces) {
         var len = spaces.split('').length;
         var arr = [];
         for (var i = 0; i < len; i++) {
-            arr[i] = (i % 2 == 0) ? '&nbsp;' : ' ';
+            arr[i] = (i % 2 == 0) ? (revEnd ? ' ' : '&nbsp;') : (revEnd ? '&nbsp;' : ' ');
         }
-        return arr.reverse().join('');
+        return revEnd ? arr.join('') : arr.reverse().join('');
     });
     return str;
-};
+},
 exports.strStripWhitespaces = function(str) {
     return (typeof str == 'string') ? str.replace(/\s+/, '') : '';
 };
