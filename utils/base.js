@@ -314,20 +314,29 @@ exports.strToHTMLText = function(str) {
     str = str.replace(/(&|"|<|>)/g, function(match, k) {
         return ('&' + map[k] + ';') || k;
     });
-    str = str.replace(/\S(\s+)\S/g, function(match, k) {
-        var len = k.split('').length;
-        var s = '';
+    str = str.replace(/(\S)(\s+)(\S)/g, function(match, start, spaces, end) {
+        var len = spaces.split('').length;
+        var s = start;
         for (var i = 0; i < len; i++) {
             s += (i % 2 == 0) ? ' ' : '&nbsp;';
         }
-        return s;
+        return s + end;
     });
-    str = str.replace(/(^\s+|\s+$)/g, function(match, k) {
+    str = str.replace(/^\s+/, function(spaces) {
+        var len = spaces.split('').length;
         var s = '';
-        for (var i = 0; i < k.length; i++) {
-            s += '&nbsp;';
+        for (var i = 0; i < len; i++) {
+            s += (i % 2 == 0) ? '&nbsp;' : ' ';
         }
         return s;
+    });
+    str = str.replace(/\s+$/, function(spaces) {
+        var len = spaces.split('').length;
+        var arr = [];
+        for (var i = 0; i < len; i++) {
+            arr[i] = (i % 2 == 0) ? '&nbsp;' : ' ';
+        }
+        return arr.reverse().join('');
     });
     return str;
 };

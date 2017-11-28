@@ -1,8 +1,8 @@
 var U = require('../utils/base');
-var str = U.strToHTMLText('  Lorem ipsum    dolor sit amet.   ');
-U.log('str:', str);
-str = 'Lorem sit amet, adipiscing elit, magna aliqua. Ut ad veniam, consequat??? Cil';
+var str = '  Lorem sit      amet, adipiscing elit,, , ,,, magna aliqua. Ut ad veniam, consequat?!? cillum dolore eu nulla!! Excepteur sint non ctrl.getTasks() proident, anim id laborum.   ';
+var html = U.strToHTMLText(str);
+U.log('html:' + html);
 var reversed = U.strReverse(str);
-console.log('reversed: ' + reversed);
+U.log('reversed:' + reversed);
 var until = U.strUntil(reversed, /\s+/g);
-console.log('until: ' + until);
+U.log('until:' + until);
