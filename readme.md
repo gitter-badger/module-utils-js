@@ -8,7 +8,7 @@ Project contains compiler which generates following output:
 var U = {
     name: 'DefaultModule',
     version: '1.0.0',
-    utilsVersion: '1.0.8',
+    utilsVersion: '1.1.0',
     yourUtilityFunction1: // (function|object|date)
     // More utilities...
 }
