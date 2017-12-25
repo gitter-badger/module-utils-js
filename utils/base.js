@@ -386,7 +386,11 @@ exports.error = function(problem, message) {
             throw new Error(this.id);
         },
         log: function() {
-            exports.logWarn(this.id + ': ' + this.message);
+            var str = this.id;
+            if (this.message) {
+                str += ': ' + this.message;
+            }
+            exports.logWarn(str);
         },
         logAndThrow: function() {
             this.log();

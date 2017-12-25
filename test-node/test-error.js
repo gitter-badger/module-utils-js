@@ -6,6 +6,7 @@ var errorBuilder = new ErrorBuilder();
 var err = error('BuggsBunny-name', 'Parameter ...');
 // log(err.throw());
 log(err.toString());
+error('invalidParameter').logAndThrow();
 errorBuilder.push(error('BuggsBunny-name', 'Parameter "name" is missing or has incorrect format.'));
 errorBuilder.push(error(new Error('BuggsBunny-carrots'), 'Parameter "carrots" is missing or has incorrect format.'));
 log('Builder0: ', errorBuilder.toString());
