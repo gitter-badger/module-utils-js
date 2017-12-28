@@ -1,6 +1,6 @@
 exports.moduleName = 'DefaultModule';
 exports.version = '1.0.0';
-exports.utilsVersion = '1.1.0';
+exports.utilsVersion = '1.1.1';
 exports.lan = {
     SK: 'SK',
     CZ: 'CZ',
@@ -205,6 +205,12 @@ exports.argsToDebugString = function(args) {
 		}
 	}
 	return logs;
+};
+exports.strPadStart = function(len, str) {
+    return String.prototype.padStart(len, str);
+};
+exports.strPadEnd = function(len, str) {
+    return String.prototype.padEnd(len, str);
 };
 exports.strFormat = function(str, args) {
     return str.replace(/\{\d+\}/g, function(text) {
