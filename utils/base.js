@@ -1569,9 +1569,11 @@ exports.strSlug = function(str, max) {
     var l = builder.length - 1;
     return builder[l] === '-' ? builder.substring(0, l) : builder;
 };
-exports.strUntil = function(str, splitRegex) {
-    var parts = str.split(splitRegex);
-    return (Array.isArray(parts) && parts[0]) ? parts[0] : '';
+exports.strReplaceBetween = function(str, i, j, part) {
+    return str.substring(0, i) + part + str.substring(j);
+};
+exports.strReplaceCharAt = function(str, i, ch) {
+    return str.substr(0, i) + ch + str.substr(i + ch.length);
 };
 exports.strReverse = function(str) {
     var rev = '';
@@ -1579,6 +1581,18 @@ exports.strReverse = function(str) {
         rev += str[i];
     }
     return rev;
+};
+exports.strUntil = function(str, splitRegex) {
+    var parts = str.split(splitRegex);
+    return (Array.isArray(parts) && parts[0]) ? parts[0] : '';
+};
+exports.strReverseUntil = function(str, splitRegex) {
+    var rev = '';
+    for (var i = str.length - 1; i >= 0; i--) {
+        rev += str[i];
+    }
+    var parts = rev.split(splitRegex);
+    return (Array.isArray(parts) && parts[0]) ? parts[0] : '';
 };
 exports.regexMatchLength = function(str, regex, i) {
     var matches = str.match(regex);
