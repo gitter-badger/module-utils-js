@@ -1582,17 +1582,31 @@ exports.strReverse = function(str) {
     }
     return rev;
 };
-exports.strUntil = function(str, splitRegex) {
-    var parts = str.split(splitRegex);
-    return (Array.isArray(parts) && parts[0]) ? parts[0] : '';
+exports.strUntil = function(str, exp) {
+    var arr = str.split(exp);
+    return (Array.isArray(arr) && arr[0]) ? arr[0] : '';
 };
-exports.strReverseUntil = function(str, splitRegex) {
+exports.strFromUntil = function(str, leftIndex, exp) {
+    str = str.substring(leftIndex);
+    var arr = str.split(exp);
+    return (Array.isArray(arr) && arr[0]) ? arr[0] : '';
+};
+exports.strReverseUntil = function(str, exp) {
     var rev = '';
     for (var i = str.length - 1; i >= 0; i--) {
         rev += str[i];
     }
-    var parts = rev.split(splitRegex);
-    return (Array.isArray(parts) && parts[0]) ? parts[0] : '';
+    var arr = rev.split(exp);
+    return (Array.isArray(arr) && arr[0]) ? arr[0] : '';
+};
+exports.strReverseFromUntil = function(str, rightIndex, exp) {
+    var rev = '';
+    for (var i = str.length - 1; i >= 0; i--) {
+        rev += str[i];
+    }
+    rev = rev.substring(rightIndex);
+    var arr = rev.split(exp);
+    return (Array.isArray(arr) && arr[0]) ? arr[0] : '';
 };
 exports.regexMatchLength = function(str, regex, i) {
     var matches = str.match(regex);
