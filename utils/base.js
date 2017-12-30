@@ -310,7 +310,7 @@ exports.strStripHTML = function(str) {
         return map[k] || k;
     });
 };
-exports.strToHTMLText = function(str, revStart, revEnd){
+exports.strToHTMLText = function(str, leftStartWithNBPS, leftRevResult, rightStartWithNBPS, rightRevResult) {
     var map = {
         '&': 'amp',
         '\"': 'quot',
@@ -320,31 +320,36 @@ exports.strToHTMLText = function(str, revStart, revEnd){
     str = str.replace(/(&|"|<|>)/g, function(match, k) {
         return ('&' + map[k] + ';') || k;
     });
-    str = str.replace(/(\S)(\s+)(\S)/g, function(match, start, spaces, end) {
-        var len = spaces.split('').length;
-        var s = start;
-        for (var i = 0; i < len; i++) {
-            s += (i % 2 == 0) ? ' ' : '&nbsp;';
-        }
-        return s + end;
-    });
+    str = replaceMultipleWhitespacesBetweenChars(str);
     str = str.replace(/^\s+/, function(spaces) {
         var len = spaces.split('').length;
-        var arr = [];
-        for (var i = 0; i < len; i++) {
-            arr[i] = (i % 2 == 0) ? (revStart ? ' ' : '&nbsp;') : (revStart ? '&nbsp;' : ' ');
-        }
-        return revStart ? arr.reverse().join('') : arr.join('');
+        return generateSpaces(len, leftStartWithNBPS, leftRevResult);
     });
     str = str.replace(/\s+$/, function(spaces) {
         var len = spaces.split('').length;
-        var arr = [];
-        for (var i = 0; i < len; i++) {
-            arr[i] = (i % 2 == 0) ? (revEnd ? ' ' : '&nbsp;') : (revEnd ? '&nbsp;' : ' ');
-        }
-        return revEnd ? arr.join('') : arr.reverse().join('');
+        return generateSpaces(len, rightStartWithNBPS, rightRevResult);
     });
     return str;
+    function replaceMultipleWhitespacesBetweenChars(str) {
+        var exp = /[^\s](\s+)[^\s]/g;
+        while ((match = exp.exec(str)) != null) {
+            if (Array.isArray(match)) {
+                exp.lastIndex -= 1; // MATCH OVERLAPS
+                var i = match.index + 1;
+                var len = match[1].length;
+                var part = generateSpaces(len, false, true); // PRESERVE BS ON CHAR LEFT BOUNDARY
+                str = str.substring(0, i) + part + str.substring(i + len);
+            }
+        }
+        return str;
+    }
+    function generateSpaces(len, startWithNBPS, revResult) {
+        var arr = [];
+        for (var i = 0; i < len; i++) {
+            arr[i] = (i % 2 == 0) ? (startWithNBPS ? '&nbsp;' : ' ') : (startWithNBPS ? ' ' : '&nbsp;');
+        }
+        return revResult ? arr.reverse().join('') : arr.join('');
+    };
 },
 exports.strStripWhitespaces = function(str) {
     return (typeof str == 'string') ? str.replace(/\s+/, '') : '';
@@ -1599,12 +1604,12 @@ exports.strReverseUntil = function(str, exp) {
     var arr = rev.split(exp);
     return (Array.isArray(arr) && arr[0]) ? arr[0] : '';
 };
-exports.strReverseFromUntil = function(str, rightIndex, exp) {
+exports.strReverseFromUntil = function(str, leftIndex, exp) {
+    str = str.substring(0, leftIndex);
     var rev = '';
     for (var i = str.length - 1; i >= 0; i--) {
         rev += str[i];
     }
-    rev = rev.substring(rightIndex);
     var arr = rev.split(exp);
     return (Array.isArray(arr) && arr[0]) ? arr[0] : '';
 };
