@@ -5,8 +5,8 @@ var strC = '  aa    aa  ';
 var strD = '   aa     aa   ';
 var strE = '    aa      aa    ';
 
-// TOTAL NBPS
-// TOTAL NBPS
+// TOTAL START NBPS
+// TOTAL END NBPS
 U.log('1A:' + U.strToHTMLText(strA, true, false, true, true).replace(/\s/g, '_'));
 U.log('1B:' + U.strToHTMLText(strB, true, false, true, true).replace(/\s/g, '_'));
 U.log('1C:' + U.strToHTMLText(strC, true, false, true, true).replace(/\s/g, '_'));
