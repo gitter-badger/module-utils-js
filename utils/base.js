@@ -322,12 +322,10 @@ exports.strToHTMLText = function(str, leftStartWithNBPS, leftRevResult, rightSta
     });
     str = replaceMultipleWhitespacesBetweenChars(str);
     str = str.replace(/^\s+/, function(spaces) {
-        var len = spaces.split('').length;
-        return generateSpaces(len, leftStartWithNBPS, leftRevResult);
+        return generateSpaces(spaces.length, leftStartWithNBPS, leftRevResult);
     });
     str = str.replace(/\s+$/, function(spaces) {
-        var len = spaces.split('').length;
-        return generateSpaces(len, rightStartWithNBPS, rightRevResult);
+        return generateSpaces(spaces.length, rightStartWithNBPS, rightRevResult);
     });
     return str;
     function replaceMultipleWhitespacesBetweenChars(str) {
