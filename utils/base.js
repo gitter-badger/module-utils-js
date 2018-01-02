@@ -1,6 +1,6 @@
 exports.moduleName = 'DefaultModule';
 exports.version = '1.0.0';
-exports.utilsVersion = '1.1.2';
+exports.utilsVersion = '1.2.0';
 exports.lan = {
     SK: 'SK',
     CZ: 'CZ',
