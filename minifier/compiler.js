@@ -10,7 +10,7 @@ exports.compileUtils = function(filePaths, accessVariable, moduleName, keys) {
         var lastFile = (fileStats.length === fileIndex + 1);
 		str += compileUtilsFromFile(fileStat.filePath, fileStat.keyCount, accessVariable, moduleName, lastFile, keys);
 	});
-	str += '};\n';
+	str += "};if(typeof(process)==='object'&&typeof(module)==='object'){module.exports=U};\n";
 	fs.writeFileSync('./utils.min.js', str);
 };
 function getFileStatsWithAtLeastOneKey(filePaths, keys) {
