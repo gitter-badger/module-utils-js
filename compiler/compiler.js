@@ -1,17 +1,22 @@
 var fs = require('fs');
-var base = require('./utils/base.js');
+var path = require('path');
 exports.compileUtils = function(filePaths, accessVariable, moduleName, keys) {
 	if (!Array.isArray(filePaths) || filePaths.length == 0) {
 		return;
     }
+    filePaths = filePaths.map(function(str) {
+        return path.resolve(str);
+    });
     fileStats = getFileStatsWithAtLeastOneKey(filePaths, keys);
-    str = 'var ' + accessVariable + ' = {\n';
+    str = '';
 	fileStats.forEach(function(fileStat, fileIndex) {
         var lastFile = (fileStats.length === fileIndex + 1);
 		str += compileUtilsFromFile(fileStat.filePath, fileStat.keyCount, accessVariable, moduleName, lastFile, keys);
-	});
-	str += "};if(typeof(process)==='object'&&typeof(module)==='object'){module.exports=U};\n";
-	fs.writeFileSync('./utils.min.js', str);
+    });
+    var out = fs.readFileSync(path.join(__dirname, 'template.js'), 'utf8');
+    out = out.replace(/ACCESS_VAR/g, accessVariable);
+    out = out.replace(/^\s*UTILS/m, str);
+	fs.writeFileSync('./utils.min.js', out);
 };
 function getFileStatsWithAtLeastOneKey(filePaths, keys) {
     var arr = [];
@@ -41,7 +46,7 @@ function compileUtilsFromFile(filePath, keyCount, accessVariable, moduleName, la
             continue;
         }
         var v = utils[k];
-        temp += '    ' + k + ': ' + compileModuleValue(k, v, accessVariable, moduleName) + ((i === keyCount && lastFile) ? '\n' : ',\n');
+        temp += '    ' + k + ': ' + compileModuleValue(k, v, accessVariable, moduleName) + ((i === keyCount && lastFile) ? '' : ',\n');
         i++;
 	}
 	return temp;
@@ -74,10 +79,14 @@ function compileModuleObjectValue(obj, accessVariable) { // REKURZIA
 		return obj.getTime();
 	}
 	var line = '{';
-	base.forIn(obj, function(k, v, first, last) {
-		v = compileModuleValue(k, v, accessVariable);
-		line += k + ':' + v + (last == true ? '' : ',');
-	});
+    var len = Object.keys(obj).length;
+    var i = 0;
+    for (var k in obj) {
+        i++;
+        var v = obj[k];
+        v = compileModuleValue(k, v, accessVariable);
+        line += k + ':' + v + (i == len ? '' : ',');
+    }
 	return line + '}';
 }
 function stringifyScript(input, accessVariable) {
