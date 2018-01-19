@@ -88,16 +88,16 @@ MODULE=MyModuleName KEYS=__cache,malloc,toDebugStr,logDebug,logWarn,log node com
 ### BASE SET
 To compile more utilities append more util keys:
 > Order must be preserved.
-#####\+ ERRORS (OPTIONAL)
+##### \+ ERRORS (OPTIONAL)
 ```
 error,ErrorBuilder
 ```
-#####\+ SCHEMAS *(OPTIONAL)*
+##### \+ SCHEMAS *(OPTIONAL)*
 ```
 lan,Schema
 ```
-#####\+ PRIMITIVE UTILS *(OPTIONAL)*
-#####\+ BROWSER UTILS *(OPTIONAL)*
+##### \+ PRIMITIVE UTILS *(OPTIONAL)*
+##### \+ BROWSER UTILS *(OPTIONAL)*
 
 #### EXAMPLE
 ```bash
