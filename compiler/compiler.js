@@ -1,6 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 exports.compileUtils = function(filePaths, accessVariable, moduleName, keys) {
+    var start = Date.now();
 	if (!Array.isArray(filePaths) || filePaths.length == 0) {
 		return;
     }
@@ -16,8 +17,16 @@ exports.compileUtils = function(filePaths, accessVariable, moduleName, keys) {
     var out = fs.readFileSync(path.join(__dirname, 'template.js'), 'utf8');
     out = out.replace(/ACCESS_VAR/g, accessVariable);
     out = out.replace(/^\s*UTILS/m, str);
-	fs.writeFileSync('./utils.min.js', out);
+    fs.writeFileSync('./utils.min.js', out);
+    endLog(start, out);
+
 };
+function endLog(start, out) {
+    var s = Buffer.byteLength(str, 'utf8');
+    s = s / 1000;
+    var t = (Date.now() - start);
+    console.log('TIME: ' + t + 'ms | SIZE: ' + s + 'kb');
+}
 function getFileStatsWithAtLeastOneKey(filePaths, keys) {
     var arr = [];
     filePaths.forEach(function(path) {
