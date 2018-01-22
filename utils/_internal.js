@@ -5,6 +5,12 @@ exports.malloc = function(prefix) {
     }
     var obj = exports.__cache[prefix];
     return function(k, v) {
+        if (typeof(k) === 'object' && v === undefined) {
+            return obj = k;
+        }
+        if (k === undefined && v === undefined) {
+            return obj;
+        }
         if (typeof(k) !== 'string') {
             throw new Error('invalidParameter');
         }
