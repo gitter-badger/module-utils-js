@@ -22,9 +22,9 @@ exports.compileUtils = function(filePaths, accessVariable, moduleName, keys) {
 };
 function endLog(start, out) {
     var s = Buffer.byteLength(str, 'utf8');
-    s = s / 1000;
+    s = (s / 1000).toFixed(1);
     var t = (Date.now() - start);
-    console.log('TIME: ' + t + 'ms | SIZE: ' + s + 'kb');
+    console.log(s + 'kB at ' + t + 'ms');
 }
 function getFileStatsWithAtLeastOneKey(filePaths, keys) {
     var arr = [];
