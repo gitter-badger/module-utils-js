@@ -1,7 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 var KEYS = [];
-exports.compileUtils = function(filePaths, accessVariable, keys) {
+exports.compileUtils = function(filePaths, accessVariable, keys, out) {
     if (Array.isArray(keys)) {
         keys = KEYS = unique(keys);
     }
@@ -18,17 +18,17 @@ exports.compileUtils = function(filePaths, accessVariable, keys) {
         var lastFile = (fileStats.length === fileIndex + 1);
         str += compileUtilsFromFile(fileStat.filePath, fileStat.keyCount, accessVariable, lastFile, keys);
     });
-    var out = fs.readFileSync(path.join(__dirname, 'template.js'), 'utf8');
-    out = out.replace(/ACCESS_VAR/g, accessVariable);
-    out = out.replace(/^\s*UTILS/m, str);
-    fs.writeFileSync('./utils.min.js', out);
-    endLog(start, out);
+    var code = fs.readFileSync(path.join(__dirname, 'template.js'), 'utf8');
+    code = code.replace(/ACCESS_VAR/g, accessVariable);
+    code = code.replace(/^\s*UTILS/m, str);
+    fs.writeFileSync(out, code);
+    endLog(out, start, code);
 };
-function endLog(start, out) {
+function endLog(out, start) {
     var s = Buffer.byteLength(str, 'utf8');
     s = (s / 1000).toFixed(1);
     var t = (Date.now() - start);
-    console.log(s + 'kB at ' + t + 'ms');
+    console.log(out + '\t' + s + 'kB\t ' + t + 'ms');
 }
 function getFileStatsWithAtLeastOneKey(filePaths, keys) {
     var arr = [];

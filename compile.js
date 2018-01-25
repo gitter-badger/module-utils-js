@@ -3,7 +3,7 @@ var keys = null;
 if (process.env.KEYS) {
     keys = process.env.KEYS.split(/\s*,\s*/);
 }
-compiler.compileUtils([
+var files = [
     'utils/meta/module-info.js',
     'utils/meta/utils-info.js',
     'utils/_internal.js',
@@ -18,4 +18,6 @@ compiler.compileUtils([
     'utils/core/proc.js',
     'utils/browser/ajax.js',
     'utils/browser/dom.js'
-], 'U', keys);
+];
+compiler.compileUtils(files, 'U', keys, './utils.js');
+compiler.compileUtils(files, 'U', null, './utils-all.js');
