@@ -2,7 +2,9 @@ var fs = require('fs');
 var path = require('path');
 var KEYS = [];
 exports.compileUtils = function(filePaths, accessVariable, keys) {
-    keys = KEYS = unique(keys);
+    if (Array.isArray(keys)) {
+        keys = KEYS = unique(keys);
+    }
     var start = Date.now();
     if (!Array.isArray(filePaths) || filePaths.length == 0) {
         return;
