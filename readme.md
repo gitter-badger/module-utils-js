@@ -82,7 +82,7 @@ Enviroment variables:
 ### CORE SET
 If you use included utils this is total minimum which must be always compiled:
 ```bash
-MODULE=MyModuleName KEYS=__cache,malloc,toDebugStr,logDebug,logWarn,log node compile
+moduleName=MyModuleName moduleVersion=1.2.3 KEYS=moduleName,moduleVersion,utilsVersion,utilsCompileCMD,__cache,malloc,toDebugStr,logDebug,logWarn,log node compile
 ```
 
 ### BASE SET
@@ -90,18 +90,18 @@ To compile more utilities append more util keys:
 > Order must be preserved.
 ##### \+ ERRORS (OPTIONAL)
 ```
-error,ErrorBuilder
+...,error,ErrorBuilder
 ```
 ##### \+ SCHEMAS *(OPTIONAL)*
 ```
-lan,Schema
+...,Schema
 ```
 ##### \+ PRIMITIVE UTILS *(OPTIONAL)*
 ##### \+ BROWSER UTILS *(OPTIONAL)*
 
 #### EXAMPLE
 ```bash
-MODULE=Calendar KEYS=__cache,malloc,toDebugStr,logDebug,logWarn,log,error,ErrorBuilder,lan,Schema node compile
+moduleName=Calendar moduleVersion=1.2.3 KEYS=moduleName,moduleVersion,utilsVersion,utilsCompileCMD,__cache,malloc,toDebugStr,logDebug,logWarn,log,error,ErrorBuilder,Schema node compile
 ```
 
 ### NOTES
