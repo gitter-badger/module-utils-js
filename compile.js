@@ -4,7 +4,8 @@ if (process.env.KEYS) {
     keys = process.env.KEYS.split(/\s*,\s*/);
 }
 compiler.compileUtils([
-    'utils/meta.js',
+    'utils/meta/module-info.js',
+    'utils/meta/utils-info.js',
     'utils/_internal.js',
     'utils/core/log.js',
     'utils/core/generators.js',
@@ -17,4 +18,4 @@ compiler.compileUtils([
     'utils/core/proc.js',
     'utils/browser/ajax.js',
     'utils/browser/dom.js'
-], 'U', process.env.MODULE || 'DefaultModule', keys);
+], 'U', keys);

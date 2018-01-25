@@ -1,6 +1,8 @@
 var fs = require('fs');
 var path = require('path');
-exports.compileUtils = function(filePaths, accessVariable, moduleName, keys) {
+var KEYS = [];
+exports.compileUtils = function(filePaths, accessVariable, keys) {
+    keys = KEYS = unique(keys);
     var start = Date.now();
     if (!Array.isArray(filePaths) || filePaths.length == 0) {
         return;
@@ -12,7 +14,7 @@ exports.compileUtils = function(filePaths, accessVariable, moduleName, keys) {
     str = '';
     fileStats.forEach(function(fileStat, fileIndex) {
         var lastFile = (fileStats.length === fileIndex + 1);
-        str += compileUtilsFromFile(fileStat.filePath, fileStat.keyCount, accessVariable, moduleName, lastFile, keys);
+        str += compileUtilsFromFile(fileStat.filePath, fileStat.keyCount, accessVariable, lastFile, keys);
     });
     var out = fs.readFileSync(path.join(__dirname, 'template.js'), 'utf8');
     out = out.replace(/ACCESS_VAR/g, accessVariable);
@@ -42,7 +44,7 @@ function getFileStatsWithAtLeastOneKey(filePaths, keys) {
     });
     return arr;
 }
-function compileUtilsFromFile(filePath, keyCount, accessVariable, moduleName, lastFile, keys) {
+function compileUtilsFromFile(filePath, keyCount, accessVariable, lastFile, keys) {
     var temp = '';
     var utils = require(filePath);
     var i = 1;
@@ -54,12 +56,42 @@ function compileUtilsFromFile(filePath, keyCount, accessVariable, moduleName, la
             continue;
         }
         var v = utils[k];
-        temp += '    ' + k + ': ' + compileModuleValue(k, v, accessVariable, moduleName) + ((i === keyCount && lastFile) ? '' : ',\n');
+        temp += '    ' + k + ': ' + compileModuleValue(k, v, accessVariable) + ((i === keyCount && lastFile) ? '' : ',\n');
         i++;
     }
     return temp;
 }
-function compileModuleValue(key, value, accessVariable, moduleName) {
+function isSpecialProperty(key) {
+    return process.env[key] || ['utilsCompileCMD'].indexOf(key) >= 0;
+}
+function getSpecialProperty(key) {
+    var v = '';
+    if (key == 'utilsCompileCMD') {
+        v = composeCMD();
+    }
+    else {
+        v = process.env[key] || '';
+    }
+    return v ? ("'" + v + "'") : "''";
+}
+function composeCMD() {
+    var arr = [];
+    KEYS.forEach(function(key) {
+        var v = process.env[key];
+        if (v) {
+            arr.push(key + '=' + v);
+        }
+    });
+    if (process.env.KEYS) {
+        arr.push('KEYS=' + unique(process.env.KEYS.split(/\s*,\s*/)).join(','));
+    }
+    arr.push('node compile');
+    return arr.join(' ');
+}
+function compileModuleValue(key, value, accessVariable) {
+    if (isSpecialProperty(key)) {
+        return getSpecialProperty(key);
+    }
     if (!value) {
         return value;
     }
@@ -70,9 +102,6 @@ function compileModuleValue(key, value, accessVariable, moduleName) {
         return compileModuleObjectValue(value);
     }
     else if (typeof(value) == 'string') {
-        if (key == 'moduleName') {
-            value = moduleName;
-        }
         return "'" + value + "'";
     }
     else if (typeof(value.toString) == 'function') {
@@ -117,4 +146,14 @@ function stringifyScript(input, accessVariable) {
         }
         return result;
     });
+}
+function unique(arr) {
+    var unique = [];
+    for (var i = 0, len = arr.length; i < len; i++) {
+        var v = arr[i];
+        if (unique.indexOf(v) === -1) {
+            unique.push(v);
+        }
+    }
+    return unique;
 }
