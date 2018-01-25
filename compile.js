@@ -20,4 +20,8 @@ var files = [
     'utils/browser/dom.js'
 ];
 compiler.compileUtils(files, 'U', keys, './utils.js');
-compiler.compileUtils(files, 'U', null, './utils-all.js');
+compiler.compileUtils(files, 'U', null, './utils.git.js', [
+    'moduleName',
+    'moduleVersion',
+    'utilsCompileCMD'
+]);

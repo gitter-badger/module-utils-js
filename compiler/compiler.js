@@ -1,7 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 var KEYS = [];
-exports.compileUtils = function(filePaths, accessVariable, keys, out) {
+exports.compileUtils = function(filePaths, accessVariable, keys, out, exceptKeys) {
     if (Array.isArray(keys)) {
         keys = KEYS = unique(keys);
     }
@@ -16,7 +16,7 @@ exports.compileUtils = function(filePaths, accessVariable, keys, out) {
     str = '';
     fileStats.forEach(function(fileStat, fileIndex) {
         var lastFile = (fileStats.length === fileIndex + 1);
-        str += compileUtilsFromFile(fileStat.filePath, fileStat.keyCount, accessVariable, lastFile, keys);
+        str += compileUtilsFromFile(fileStat.filePath, fileStat.keyCount, accessVariable, lastFile, keys, exceptKeys);
     });
     var code = fs.readFileSync(path.join(__dirname, 'template.js'), 'utf8');
     code = code.replace(/ACCESS_VAR/g, accessVariable);
@@ -46,7 +46,7 @@ function getFileStatsWithAtLeastOneKey(filePaths, keys) {
     });
     return arr;
 }
-function compileUtilsFromFile(filePath, keyCount, accessVariable, lastFile, keys) {
+function compileUtilsFromFile(filePath, keyCount, accessVariable, lastFile, keys, exceptKeys) {
     var temp = '';
     var utils = require(filePath);
     var i = 1;
@@ -55,6 +55,9 @@ function compileUtilsFromFile(filePath, keyCount, accessVariable, lastFile, keys
             continue;
         }
         if (Array.isArray(keys) && keys.indexOf(k) < 0) {
+            continue;
+        }
+        if (Array.isArray(exceptKeys) && exceptKeys.indexOf(k) >= 0) {
             continue;
         }
         var v = utils[k];
