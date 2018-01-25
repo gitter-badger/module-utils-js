@@ -32,7 +32,7 @@ exports.arrRemove = function(arr, fn, v) { // FROM TOTAL.JS
     var isFN = typeof(fn) === 'function';
     var isV = v !== undefined;
     var tmp = [];
-    for (var i = 0, length = arr.length; i < length; i++) {
+    for (var i = 0, len = arr.length; i < len; i++) {
         if (isFN) {
             !fn.call(arr, arr[i], i) && tmp.push(arr[i]);
             continue;
@@ -138,4 +138,32 @@ exports.arrOrderBy = function(arr, name, asc, maxlength) { // FROM TOTAL.JS EXCE
 };
 exports.arrHas = function(arr, v) {
     return arr.indexOf(v) >= 0;
+};
+exports.arrUnique = function(arr, k) {
+    var result = [];
+    var sublen = 0;
+    for (var i = 0, len = arr.length; i < len; i++) {
+        var v = arr[i];
+        if (!k) {
+            result.indexOf(v) === -1 && result.push(v);
+            continue;
+        }
+        if (sublen === 0) {
+            result.push(v);
+            sublen++;
+            continue;
+        }
+        var is = true;
+        for (var j = 0; j < sublen; j++) {
+            if (result[j][k] === v[k]) {
+                is = false;
+                break;
+            }
+        }
+        if (is) {
+            result.push(v);
+            sublen++;
+        }
+    }
+    return result;
 };
