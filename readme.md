@@ -11,8 +11,8 @@ Storage for custom JavaScript utility functions.
 ```javascript
 var U = {
     // META START
-    name: 'MyModuleName',
-    version: '1.0.0',
+    moduleName: 'MyModuleName',
+    moduleVersion: '1.0.0',
     utilsVersion: '1.2.0',
     // META END
     // INTERNALS START
@@ -75,9 +75,13 @@ Compile all utility functions:
 ```bash
 node compile
 ```
-Enviroment variables:
-- `MODULE=` - **PascalCase** recommended, sets `U.moduleName` meta property.
+**ENV variables**
 - `KEYS=` - List of comma separated keys - which utils to compile.
+
+**Custom ENV variables**
+- `moduleName=` - **PascalCase** recommended
+- `moduleVersion=` - `x.x.x`
+> **Tip:** You can define custom ENV variables to set other meta properties.
 
 ### CORE SET
 If you use included utils this is total minimum which must be always compiled:
