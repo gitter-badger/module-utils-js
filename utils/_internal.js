@@ -1,5 +1,7 @@
-exports.__cache = {};
 exports.malloc = function(prefix) {
+    if (!exports.__cache) {
+        exports.__cache = {};
+    }
     if (!exports.__cache[prefix]) {
         exports.__cache[prefix] = {};
     }
