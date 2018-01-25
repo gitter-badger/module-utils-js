@@ -11,8 +11,7 @@ Storage for custom JavaScript utility functions.
 ```javascript
 var U = {
     // META START
-    moduleName: 'MyModuleName',
-    moduleVersion: '1.0.0',
+    v: '1.0.0',
     utilsVersion: '1.2.0',
     // META END
     // INTERNALS START
@@ -79,14 +78,13 @@ node compile
 - `KEYS=` - List of comma separated keys - which utils to compile.
 
 **Custom ENV variables**
-- `moduleName=` - **PascalCase** recommended
-- `moduleVersion=` - `x.x.x`
+- `v=` - `x.x.x` Version of your module, library, project or whatever.
 > **Tip:** You can define custom ENV variables to set other meta properties.
 
 ### CORE SET
 If you use included utils this is total minimum which must be always compiled:
 ```bash
-moduleName=MyModuleName moduleVersion=1.2.3 KEYS=moduleName,moduleVersion,utilsVersion,utilsCompileCMD,__cache,malloc,toDebugStr,logDebug,logWarn,log node compile
+v=1.2.3 KEYS=v,utilsVersion,utilsCompileCMD,__cache,malloc,toDebugStr,logDebug,logWarn,log node compile
 ```
 
 ### BASE SET
@@ -105,7 +103,7 @@ To compile more utilities append more util keys:
 
 #### EXAMPLE
 ```bash
-moduleName=Calendar moduleVersion=1.2.3 KEYS=moduleName,moduleVersion,utilsVersion,utilsCompileCMD,__cache,malloc,toDebugStr,logDebug,logWarn,log,error,ErrorBuilder,Schema node compile
+v=1.2.3 KEYS=v,utilsVersion,utilsCompileCMD,__cache,malloc,toDebugStr,logDebug,logWarn,log,error,ErrorBuilder,Schema node compile
 ```
 
 ### NOTES

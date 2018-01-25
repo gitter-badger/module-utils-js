@@ -4,8 +4,7 @@ if (process.env.KEYS) {
     keys = process.env.KEYS.split(/\s*,\s*/);
 }
 var files = [
-    'utils/meta/module-info.js',
-    'utils/meta/utils-info.js',
+    'utils/meta.js',
     'utils/_internal.js',
     'utils/core/log.js',
     'utils/core/generators.js',
@@ -21,7 +20,6 @@ var files = [
 ];
 compiler.compileUtils(files, 'U', keys, './utils.js');
 compiler.compileUtils(files, 'U', null, './utils.git.js', [
-    'moduleName',
-    'moduleVersion',
+    'v',
     'utilsCompileCMD'
 ]);
