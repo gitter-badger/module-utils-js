@@ -1,4 +1,23 @@
-exports.SID = function(len) {
+exports.genUID = function() {
+    var d = new Date();
+    var mo = twoPlaces(d.getMonth() + 1);
+    var day = twoPlaces(d.getDate());
+    var h = twoPlaces(d.getHours());
+    var min = twoPlaces(d.getMinutes());
+    var arr = [
+        d.getFullYear(),
+        mo,
+        day,
+        h,
+        min,
+        exports.SID(3)
+    ];
+    return arr.join('-');
+    function twoPlaces(v) {
+        return v < 10 ? ('0' + v) : v;
+    }
+};
+exports.genSID = function(len) {
     var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     len = parseInt(len);
     len = isNaN(len) ? 5 : len;
@@ -18,26 +37,7 @@ exports.SID = function(len) {
     cache('SID', c);
     return (str.length > 0) ? (str + '-' + c) : c;
 };
-exports.UID = function() {
-    var d = new Date();
-    var mo = twoPlaces(d.getMonth() + 1);
-    var day = twoPlaces(d.getDate());
-    var h = twoPlaces(d.getHours());
-    var min = twoPlaces(d.getMinutes());
-    var arr = [
-        d.getFullYear(),
-        mo,
-        day,
-        h,
-        min,
-        exports.SID(3)
-    ];
-    return arr.join('-');
-    function twoPlaces(v) {
-        return v < 10 ? ('0' + v) : v;
-    }
-};
-exports.IID = function(len) {
+exports.genIID = function(len) {
     var c = exports.malloc('__GEN');
     len = parseInt(len);
     len = isNaN(len) ? 3 : len;
