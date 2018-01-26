@@ -1,6 +1,3 @@
-exports.__domInternal = {
-    handler: {}
-};
 exports.domReady = function(fn) {
     if (document.attachEvent ? (document.readyState === "complete") : (document.readyState !== "loading")) {
         fn();
@@ -58,7 +55,7 @@ exports.domFind = function(sel, el) {
         return [];
     }
     function selectingOne(sel) {
-        if (U.domIsEl(sel)) {
+        if (exports.domIsEl(sel)) {
             return true;
         }
         else if (typeof(sel) === 'string') {
@@ -244,7 +241,7 @@ exports.domVal = function(sel, v) {
         }
     }
     function selectingOne(sel) {
-        if (U.domIsEl(sel)) {
+        if (exports.domIsEl(sel)) {
             return true;
         }
         else if (typeof(sel) === 'string') {
@@ -304,7 +301,7 @@ exports.domAttr = function(sel, k, v) {
         el.setAttribute(k, '' + v);
     }
     function selectingOne(sel) {
-        if (U.domIsEl(sel)) {
+        if (exports.domIsEl(sel)) {
             return true;
         }
         else if (typeof(sel) === 'string') {
@@ -391,7 +388,7 @@ exports.domData = function(sel, k, v) {
         }
     }
     function selectingOne(sel) {
-        if (U.domIsEl(sel)) {
+        if (exports.domIsEl(sel)) {
             return true;
         }
         else if (typeof(sel) === 'string') {
@@ -442,7 +439,7 @@ exports.domHTML = function(sel, v) {
         el.innerHTML = v;
     }
     function selectingOne(sel) {
-        if (U.domIsEl(sel)) {
+        if (exports.domIsEl(sel)) {
             return true;
         }
         else if (typeof(sel) === 'string') {
@@ -493,7 +490,7 @@ exports.domText = function(sel, v) {
         el.textContent = v;
     }
     function selectingOne(sel) {
-        if (U.domIsEl(sel)) {
+        if (exports.domIsEl(sel)) {
             return true;
         }
         else if (typeof(sel) === 'string') {
@@ -532,7 +529,7 @@ exports.domParent = function(sel) {
         return el.parentNode || null;
     }
     function selectingOne(sel) {
-        if (U.domIsEl(sel)) {
+        if (exports.domIsEl(sel)) {
             return true;
         }
         else if (typeof(sel) === 'string') {
@@ -576,7 +573,7 @@ exports.domChildren = function(sel) {
         return arr;
     }
     function selectingOne(sel) {
-        if (U.domIsEl(sel)) {
+        if (exports.domIsEl(sel)) {
             return true;
         }
         else if (typeof(sel) === 'string') {
@@ -668,7 +665,7 @@ exports.domPrev = function(sel) {
         return null;
     }
     function selectingOne(sel) {
-        if (U.domIsEl(sel)) {
+        if (exports.domIsEl(sel)) {
             return true;
         }
         else if (typeof(sel) === 'string') {
@@ -715,7 +712,7 @@ exports.domPrevAll = function(sel) {
         }
     }
     function selectingOne(sel) {
-        if (U.domIsEl(sel)) {
+        if (exports.domIsEl(sel)) {
             return true;
         }
         else if (typeof(sel) === 'string') {
@@ -770,7 +767,7 @@ exports.domNext = function(sel, nsel) {
         return null;
     }
     function selectingOne(sel) {
-        if (U.domIsEl(sel)) {
+        if (exports.domIsEl(sel)) {
             return true;
         }
         else if (typeof(sel) === 'string') {
@@ -821,7 +818,7 @@ exports.domNextAll = function(sel) {
         return arr;
     }
     function selectingOne(sel) {
-        if (U.domIsEl(sel)) {
+        if (exports.domIsEl(sel)) {
             return true;
         }
         else if (typeof(sel) === 'string') {
@@ -875,7 +872,7 @@ exports.domStyle = function(sel, k, v) {
         el.style[k] = v;
     }
     function selectingOne(sel) {
-        if (U.domIsEl(sel)) {
+        if (exports.domIsEl(sel)) {
             return true;
         }
         else if (typeof(sel) === 'string') {
@@ -913,7 +910,7 @@ exports.domFadeIn = function(sel, t) {
         el.style.opacity = '1';
     }
     function selectingOne(sel) {
-        if (U.domIsEl(sel)) {
+        if (exports.domIsEl(sel)) {
             return true;
         }
         else if (typeof(sel) === 'string') {
@@ -1061,14 +1058,6 @@ exports.domOn = function(sel, k, fn) {
         handler[el][k].push(fn);
         el.addEventListener(k, fn, false);
         cache('handler', handler);
-        // if (!exports.__domInternal.handler[el]) {
-        //     exports.__domInternal.handler[el] = {};
-        // }
-        // if (!exports.__domInternal.handler[el][k]) {
-        //     exports.__domInternal.handler[el][k] = []; // Multiple handlers can be associated to one dom element.
-        // }
-        // exports.__domInternal.handler[el][k].push(fn);
-        // el.addEventListener(k, fn, false);
     }
 };
 exports.domOff = function(sel, k) { // https://stackoverflow.com/a/4386514
@@ -1094,26 +1083,32 @@ exports.domOff = function(sel, k) { // https://stackoverflow.com/a/4386514
         for (var i = 0; i < len; i++) {
             var el = els[i];
             if (el) {
-                removeListener(el, k || null);
+                els[i] = removeListener(el, k || null);
             }
         }
     }
     function removeListener(el, k) {
-        if (!exports.__domInternal.handler[el]) {
-            return;
-        }
-        if (k && exports.__domInternal.handler[el][k]) { // Remove handlers by type.
-            var fns = exports.__domInternal.handler[el][k];
-            var len = fns.length;
-            for (var i = 0; i < len; i++) {
-                var fn = fns[i];
-                el.removeEventListener(k, fn, false);
+        var cache = exports.malloc('__DOM');
+        var handler = cache('handler') || {};
+        var replacer = el;
+        if (k) { // REMOVE BY KEY
+            if (handler[el] && handler[el][k]) {
+                var fns = handler[el][k];
+                for (var i = 0; i < fns.length; i++) {
+                    var fn = fns[i];
+                    el.removeEventListener(k, fn, false);
+                }
+                handler[el][k] = null;
             }
         }
-        else { // Remove all handlers.
-            var sub = el.cloneNode(true);
-            el.parentNode.replaceChild(sub, el);
+        else { // REMOVE ALL
+            var copy = el.cloneNode(true);
+            el.parentNode.replaceChild(copy, el);
+            handler[el] = null;
+            replacer = copy;
         }
+        cache('handler', handler);
+        return replacer;
     }
 };
 exports.domTriggerNativeEvent = function(sel, k) {
