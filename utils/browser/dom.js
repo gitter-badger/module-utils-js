@@ -11,10 +11,10 @@ exports.domIsEl = function(el) {
 };
 exports.domMatches = function(el, sel) { // https://developer.mozilla.org/en-US/docs/Web/API/Element/matches
     var p = Element.prototype;
-    var f = p.matches || p.webkitMatchesSelector || p.mozMatchesSelector || p.msMatchesSelector || function(s) {
-        return (Array.prototype.indexOf.call(document.querySelectorAll(s), this) !== -1);
+    var fn = p.matches || p.webkitMatchesSelector || p.mozMatchesSelector || p.msMatchesSelector || function(s) {
+        return Array.prototype.indexOf.call(document.querySelectorAll(s), this) !== -1;
     };
-    return f.call(el, sel);
+    return fn.call(el, sel);
 };
 /**
  * @param {String} sel
