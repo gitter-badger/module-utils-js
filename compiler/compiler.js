@@ -30,7 +30,7 @@ function endLog(out, start, code) {
     var s = Buffer.byteLength(code, 'utf8');
     s = (s / 1000).toFixed(1);
     var t = (Date.now() - start);
-    console.log(out + '\t' + s + 'kB\t ' + t + 'ms'); // eslint-disable-line no-console
+    console.log(out + ' \t' + s + 'kB\t ' + t + 'ms'); // eslint-disable-line no-console
 }
 function getFileStatsWithAtLeastOneKey(filePaths, keys) {
     var arr = [];
