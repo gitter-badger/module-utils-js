@@ -1,9 +1,11 @@
 var fs = require('fs');
 var path = require('path');
+
 var KEYS = [];
 exports.compileUtils = function(filePaths, accessVariable, keys, out, exceptKeys) {
     if (Array.isArray(keys)) {
-        keys = KEYS = unique(keys);
+        keys = unique(keys);
+        KEYS = keys;
     }
     var start = Date.now();
     if (!Array.isArray(filePaths) || filePaths.length == 0) {
@@ -12,8 +14,8 @@ exports.compileUtils = function(filePaths, accessVariable, keys, out, exceptKeys
     filePaths = filePaths.map(function(str) {
         return path.resolve(str);
     });
-    fileStats = getFileStatsWithAtLeastOneKey(filePaths, keys);
-    str = '';
+    var fileStats = getFileStatsWithAtLeastOneKey(filePaths, keys);
+    var str = '';
     fileStats.forEach(function(fileStat, fileIndex) {
         var lastFile = (fileStats.length === fileIndex + 1);
         str += compileUtilsFromFile(fileStat.filePath, fileStat.keyCount, accessVariable, lastFile, keys, exceptKeys);
@@ -24,16 +26,16 @@ exports.compileUtils = function(filePaths, accessVariable, keys, out, exceptKeys
     fs.writeFileSync(out, code);
     endLog(out, start, code);
 };
-function endLog(out, start) {
-    var s = Buffer.byteLength(str, 'utf8');
+function endLog(out, start, code) {
+    var s = Buffer.byteLength(code, 'utf8');
     s = (s / 1000).toFixed(1);
     var t = (Date.now() - start);
-    console.log(out + '\t' + s + 'kB\t ' + t + 'ms');
+    console.log(out + '\t' + s + 'kB\t ' + t + 'ms'); // eslint-disable-line no-console
 }
 function getFileStatsWithAtLeastOneKey(filePaths, keys) {
     var arr = [];
     filePaths.forEach(function(path) {
-        var utils = require(path);
+        var utils = require(path); // eslint-disable-line global-require,import/no-dynamic-require
         var len = Array.isArray(keys) ? Object.keys(utils).filter(function(k) {
             return (keys.indexOf(k) >= 0);
         }).length : Object.keys(utils).length;
@@ -48,10 +50,10 @@ function getFileStatsWithAtLeastOneKey(filePaths, keys) {
 }
 function compileUtilsFromFile(filePath, keyCount, accessVariable, lastFile, keys, exceptKeys) {
     var temp = '';
-    var utils = require(filePath);
+    var utils = require(filePath); // eslint-disable-line global-require,import/no-dynamic-require
     var i = 1;
     for (var k in utils) {
-        if (!utils.hasOwnProperty(k)) {
+        if (!Object.prototype.hasOwnProperty.call(utils, k)) {
             continue;
         }
         if (Array.isArray(keys) && keys.indexOf(k) < 0) {
@@ -100,21 +102,19 @@ function compileModuleValue(key, value, accessVariable) {
     if (!value) {
         return value;
     }
-    if (typeof(value) == 'function') {
+    if (typeof(value) === 'function') {
         return stringifyScript(value.toString(), accessVariable);
     }
-    else if (typeof(value) == 'object') {
+    else if (typeof(value) === 'object') {
         return compileModuleObjectValue(value);
     }
-    else if (typeof(value) == 'string') {
+    else if (typeof(value) === 'string') {
         return "'" + value + "'";
     }
-    else if (typeof(value.toString) == 'function') {
+    else if (typeof(value.toString) === 'function') {
         return '"' + value.toString() + '"';
     }
-    else {
-        return value;
-    }
+    return value;
 }
 function compileModuleObjectValue(obj, accessVariable) { // REKURZIA
     if (obj instanceof Date) {
@@ -124,26 +124,30 @@ function compileModuleObjectValue(obj, accessVariable) { // REKURZIA
     var len = Object.keys(obj).length;
     var i = 0;
     for (var k in obj) {
-        i++;
-        var v = obj[k];
-        v = compileModuleValue(k, v, accessVariable);
-        line += k + ':' + v + (i == len ? '' : ',');
+        if (Object.prototype.hasOwnProperty.call(obj, k)) {
+            i++;
+            var v = obj[k];
+            v = compileModuleValue(k, v, accessVariable);
+            line += k + ':' + v + (i == len ? '' : ',');
+        }
     }
     return line + '}';
 }
 function stringifyScript(input, accessVariable) {
     var last = '';
-    return ('\n' + input + '\n').replace(/(?:(^|[-+\([{}=,:;!%^&*|?~]|\/(?![/*])|return|throw)(?:\s|\/\/[^\n]*\n|\/\*(?:[^*]|\*(?!\/))*\*\/)*(\/(?![/*])(?:\\[^\n]|[^[\n\/\\]|\[(?:\\[^\n]|[^\]])+)+\/)|(^|'(?:\\[\s\S]|[^\n'\\])*'|"(?:\\[\s\S]|[^\n"\\])*"|([0-9A-Za-z_$]+)|([-+]+)|.))(?:\s|\/\/[^\n]*\n|\/\*(?:[^*]|\*(?!\/))*\*\/)*/g, function (str, context, exp, result, word, operator) {
+    return ('\n' + input + '\n').replace(/(?:(^|[-+([{}=,:;!%^&*|?~]|\/(?![/*])|return|throw)(?:\s|\/\/[^\n]*\n|\/\*(?:[^*]|\*(?!\/))*\*\/)*(\/(?![/*])(?:\\[^\n]|[^[\n/\\]|\[(?:\\[^\n]|[^\]])+)+\/)|(^|'(?:\\[\s\S]|[^\n'\\])*'|"(?:\\[\s\S]|[^\n"\\])*"|([0-9A-Za-z_$]+)|([-+]+)|.))(?:\s|\/\/[^\n]*\n|\/\*(?:[^*]|\*(?!\/))*\*\/)*/g, function(str, context, exp, result, word, operator) {
         if (word) {
             if (accessVariable && word == 'exports') {
                 result = accessVariable;
             }
-            result = (last == 'word' ? ' ' : (last == 'return' ? ' ' : '')) + result;
-            last = (word == 'return' || word == 'throw' || word == 'break' ? 'return' : 'word');
-        } else if (operator) {
+            result = (last == 'word' || last == 'return' ? ' ' : '') + result;
+            last = (word == 'return' || word == 'throw' || word == 'break') ? 'return' : 'word';
+        }
+        else if (operator) {
             result = (last == operator.charAt(0) ? '\n' : '') + result;
             last = operator.charAt(0);
-        } else {
+        }
+        else {
             if (exp) {
                 result = context + (context == '/' ? '\n' : '') + exp;
             }
@@ -153,12 +157,12 @@ function stringifyScript(input, accessVariable) {
     });
 }
 function unique(arr) {
-    var unique = [];
+    var temp = [];
     for (var i = 0, len = arr.length; i < len; i++) {
         var v = arr[i];
-        if (unique.indexOf(v) === -1) {
-            unique.push(v);
+        if (temp.indexOf(v) === -1) {
+            temp.push(v);
         }
     }
-    return unique;
+    return temp;
 }

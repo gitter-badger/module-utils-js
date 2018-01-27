@@ -1,4 +1,5 @@
 var compiler = require('./compiler/compiler.js');
+
 var keys = null;
 if (process.env.KEYS) {
     keys = process.env.KEYS.split(/\s*,\s*/);
@@ -18,8 +19,8 @@ var files = [
     'utils/browser/ajax.js',
     'utils/browser/dom.js'
 ];
-compiler.compileUtils(files, 'U', keys, './utils.js');
-compiler.compileUtils(files, 'U', null, './utils.git.js', [
+compiler.compileUtils(files, 'U', keys, './dist/utils.js');
+compiler.compileUtils(files, 'U', null, './dist/utils.git.js', [
     'v',
     'utilsCompileCMD'
 ]);

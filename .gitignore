@@ -1,4 +1,4 @@
 node_modules
 minifier/tmp
 minifier/tmp/*
-utils.js
+dist/utils.js
