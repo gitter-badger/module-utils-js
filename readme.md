@@ -90,7 +90,7 @@ v=1.2.3 KEYS=v,utilsVersion,utilsCompileCMD,__cache,malloc,toDebugStr,logDebug,l
 ### BASE SET
 To compile more utilities append more util keys:
 > Order must be preserved.
-##### \+ ERRORS (OPTIONAL)
+##### \+ ERRORS *(OPTIONAL)*
 ```
 ...,error,ErrorBuilder
 ```
