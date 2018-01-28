@@ -1,4 +1,5 @@
-var U = require('../utils.git');
+var U = require('../dist/utils.git');
+
 var SchemaOne = U.Schema(function(attr, attrError, attrPrepare, attrValidate, func, funcError) {
     attr('name', String);
     attrValidate(function(v, typeMatch) {
@@ -12,7 +13,7 @@ var SchemaOne = U.Schema(function(attr, attrError, attrPrepare, attrValidate, fu
     attrPrepare(function(v) {
         return v || null; // PREPARE TO BAD TYPE WILL CAUSE TYPE MISSMATCH IN VALIDATE STEP
     });
-    attrValidate(function(v, typeMatch, obj, actualType, ruleType) {
+    attrValidate(function(v, typeMatch) {
         if (v === null) {
             return true;
         }
@@ -20,7 +21,7 @@ var SchemaOne = U.Schema(function(attr, attrError, attrPrepare, attrValidate, fu
     });
     attr('projects', Array);
     attrError('Parameter "projects" must be an array with at least one item.'); // WHEN ERROR MESSAGE FOR 'SK' LANGUAGE IS NOT FOUND -> FALLBACK TO DEFAULT attrError() MESSAGE
-    attrValidate(function(arr, typeMatch, obj, actualType, ruleType) {
+    attrValidate(function(arr, typeMatch) {
         if (!arr) {
             return false;
         }
@@ -33,7 +34,7 @@ var SchemaOne = U.Schema(function(attr, attrError, attrPrepare, attrValidate, fu
 var obj = {
     name: 'Tomas',
     // surname: undefined,
-    projects: [],
+    projects: []
     // getName: function() {}
 };
 var errors = SchemaOne.prepareAndValidate(obj, 'SK');
