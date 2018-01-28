@@ -1,5 +1,9 @@
 {
     "extends": "airbnb-base",
+    "env": {
+        "browser": true,
+        "node": true
+    },
     "rules": {
         "prefer-arrow-callback": "off",
         "func-names": ["error", "never"],
@@ -23,6 +27,7 @@
         "no-continue": "off",
         "no-plusplus": "off",
         "brace-style": ["error", "stroustrup", {"allowSingleLine": false}],
+        "dot-notation": "warn",
         "space-unary-ops": [2, {
             "overrides": {
                 "typeof": false
